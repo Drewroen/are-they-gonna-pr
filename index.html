@@ -34,14 +34,19 @@
   html { -webkit-text-size-adjust: 100%; }
   body {
     margin: 0;
+    min-height: 100vh;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     background: var(--bg);
     color: var(--ink);
     font: 17px/1.47 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     text-align: center;
-    padding: max(4.5rem, env(safe-area-inset-top)) 1.25rem max(3rem, env(safe-area-inset-bottom));
+    padding: max(2rem, env(safe-area-inset-top)) 1.25rem max(2rem, env(safe-area-inset-bottom));
   }
-  main { max-width: 34rem; margin: 0 auto; }
+  main { width: 100%; max-width: 34rem; margin: 0 auto; }
 
   h1 {
     font-size: clamp(1.9rem, 8vw, 2.75rem);
