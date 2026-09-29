@@ -196,13 +196,8 @@
   function render() {
     var d = num(distEl);
     var seconds = num(thEl) * 3600 + num(tmEl) * 60 + num(tsEl);
-    var r = Pace.analyze(d, unit, seconds);
-
-    if (r.status === 'incomplete') { show('', 'idle'); return; }
-    if (r.status === 'finished') { show(r.pr ? 'PR!' : 'No PR', r.pr ? 'on' : 'off'); return; }
-    if (r.status === 'impossible') { show('PR out of reach', 'off'); return; }
-    if (Math.abs(r.delta) < 1) { show('Dead level', 'off'); return; }
-    show(r.onPace ? 'On pace' : 'Off pace', r.onPace ? 'on' : 'off');
+    var v = Pace.verdictFor(Pace.analyze(d, unit, seconds));
+    show(v.text, v.tone);
   }
 
   function setUnit(next) {

@@ -142,6 +142,48 @@ test('Splits: 30km in 1:59:00 projects a 2:47:21 finish (13s under PB)', functio
   close(r.requiredPace, (10054 - 7140) / 12.195, 0.01, 'required pace');
 });
 
+// --- verdict tiers ---------------------------------------------------------
+function tierFor(pct) {
+  return Pace.verdictFor({
+    status: pct > 0 ? 'off' : 'on',
+    pbSeconds: Pace.PB_SECONDS,
+    projected: Pace.PB_SECONDS * (1 + pct / 100),
+    delta: Pace.PB_SECONDS * pct / 100
+  }).text;
+}
+test('verdict tiers around the PB', function () {
+  assert.strictEqual(tierFor(25), 'Not today');
+  assert.strictEqual(tierFor(10), 'Not today');
+  assert.strictEqual(tierFor(9.9), 'Falling off pace');
+  assert.strictEqual(tierFor(5), 'Falling off pace');
+  assert.strictEqual(tierFor(4.9), 'Slightly behind pace');
+  assert.strictEqual(tierFor(0.2), 'Slightly behind pace');
+  assert.strictEqual(tierFor(-0.2), 'On pace for a small PR');
+  assert.strictEqual(tierFor(-4.9), 'On pace for a small PR');
+  assert.strictEqual(tierFor(-5), 'On pace for a big PR');
+  assert.strictEqual(tierFor(-9.9), 'On pace for a big PR');
+  assert.strictEqual(tierFor(-30), 'On pace for a big PR');
+});
+test('verdict tone follows the tier', function () {
+  assert.strictEqual(Pace.verdictFor({ status: 'on', projected: 9000, pbSeconds: 10054, delta: -1054 }).tone, 'on');
+  assert.strictEqual(Pace.verdictFor({ status: 'off', projected: 11000, pbSeconds: 10054, delta: 946 }).tone, 'off');
+});
+test('verdict for the special statuses', function () {
+  assert.strictEqual(Pace.verdictFor({ status: 'incomplete' }).text, '');
+  assert.strictEqual(Pace.verdictFor({ status: 'incomplete' }).tone, 'idle');
+  assert.strictEqual(Pace.verdictFor({ status: 'impossible', projected: 99999, pbSeconds: 10054, delta: 90000 }).text, 'Not today');
+  assert.strictEqual(Pace.verdictFor({ status: 'finished', pr: true }).text, 'PR!');
+  assert.strictEqual(Pace.verdictFor({ status: 'finished', pr: false }).text, 'No PR');
+  assert.strictEqual(Pace.verdictFor({ status: 'on', projected: 10054, pbSeconds: 10054, delta: 0 }).text, 'Dead level');
+});
+test('tiers as races really land', function () {
+  assert.strictEqual(Pace.verdictFor(Pace.analyze(10, 'km', 2400)).text, 'Slightly behind pace'); // 10k in 40:00
+  assert.strictEqual(Pace.verdictFor(Pace.analyze(21.0975, 'km', 5027)).text, 'Dead level');      // half at PB pace
+  assert.strictEqual(Pace.verdictFor(Pace.analyze(20, 'mi', 7200)).text, 'On pace for a big PR');// 20mi in 2:00
+  assert.strictEqual(Pace.verdictFor(Pace.analyze(5, 'km', 1440)).text, 'Not today');            // 5k in 24:00
+  assert.strictEqual(Pace.verdictFor(Pace.analyze(40, 'km', 10060)).text, 'Not today');          // past PB time
+});
+
 if (failures) {
   console.log('\n' + failures + ' test(s) failed');
   process.exit(1);

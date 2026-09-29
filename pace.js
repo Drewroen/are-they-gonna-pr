@@ -106,6 +106,26 @@
     return base;
   }
 
+  /*
+   * The verdict in words, tiered by how far the projection is from the PB:
+   *   10%+ behind -> "Not today"            5-10% behind -> "Falling off pace"
+   *   0-5% behind -> "Slightly behind pace" 0-5% ahead   -> "On pace for a small PR"
+   *   5%+ ahead   -> "On pace for a big PR" dead level   -> "Dead level"
+   */
+  function verdictFor(r) {
+    if (!r || r.status === 'incomplete') return { text: '', tone: 'idle' };
+    if (r.status === 'finished') return r.pr ? { text: 'PR!', tone: 'on' } : { text: 'No PR', tone: 'off' };
+    if (r.status === 'impossible') return { text: 'Not today', tone: 'off' };
+    if (Math.abs(r.delta) < 1) return { text: 'Dead level', tone: 'off' };
+
+    var pct = (r.projected - r.pbSeconds) / r.pbSeconds * 100;
+    if (pct >= 10) return { text: 'Not today', tone: 'off' };
+    if (pct >= 5) return { text: 'Falling off pace', tone: 'off' };
+    if (pct > 0) return { text: 'Slightly behind pace', tone: 'off' };
+    if (pct > -5) return { text: 'On pace for a small PR', tone: 'on' };
+    return { text: 'On pace for a big PR', tone: 'on' };
+  }
+
   return {
     KM_PER_MI: KM_PER_MI,
     MARATHON_KM: MARATHON_KM,
@@ -114,6 +134,7 @@
     PB_SECONDS: PB_SECONDS,
     distanceFor: distanceFor,
     analyze: analyze,
+    verdictFor: verdictFor,
     fmtClock: fmtClock,
     fmtPace: fmtPace,
     fmtGap: fmtGap
