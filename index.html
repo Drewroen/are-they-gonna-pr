@@ -193,7 +193,11 @@
     verdict.setAttribute('data-state', state);
   }
 
+  function filled(el) { return el.value.trim() !== ''; }
+
   function render() {
+    // no answer until every field has something in it
+    if (!filled(distEl) || !filled(thEl) || !filled(tmEl) || !filled(tsEl)) { show('', 'idle'); return; }
     var d = num(distEl);
     var seconds = num(thEl) * 3600 + num(tmEl) * 60 + num(tsEl);
     var v = Pace.verdictFor(Pace.analyze(d, unit, seconds));
