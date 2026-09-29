@@ -4,38 +4,28 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="theme-color" content="#faf9f5" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#262624" media="(prefers-color-scheme: dark)">
-<title>Are they gonna PR? — marathon pace checker</title>
-<meta name="description" content="Enter how far you are and your elapsed time to see whether you're on pace to beat a 2:47:34 marathon PB.">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<title>Are they gonna PR?</title>
+<meta name="description" content="Enter your distance and time to see if you're on pace to beat a 2:47:34 marathon PB.">
 <style>
   :root {
-    --bg: #faf9f5;
-    --card: #ffffff;
-    --ink: #141413;
-    --muted: #6b6a63;
-    --border: #f0eee6;
-    --line: #e3e0d6;
-    --clay: #d97757;
-    --good: #2e7d5b;
-    --good-bg: #eef6f0;
-    --bad: #a8402c;
-    --bad-bg: #fbf0ec;
-    --radius: 14px;
+    --bg: #ffffff;
+    --ink: #1d1d1f;
+    --muted: #6e6e73;
+    --field: #f5f5f7;
+    --good: #248a3d;
+    --bad: #d70015;
+    --focus: #0071e3;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #262624;
-      --card: #2f2f2c;
-      --ink: #faf9f5;
-      --muted: #a3a29b;
-      --border: #3d3d3a;
-      --line: #3d3d3a;
-      --clay: #d97757;
-      --good: #7dc4a2;
-      --good-bg: #2b3a33;
-      --bad: #e59079;
-      --bad-bg: #3a2c28;
+      --bg: #000000;
+      --ink: #f5f5f7;
+      --muted: #86868b;
+      --field: #1d1d1f;
+      --good: #30d158;
+      --bad: #ff453a;
     }
   }
   * { box-sizing: border-box; }
@@ -44,143 +34,101 @@
     margin: 0;
     background: var(--bg);
     color: var(--ink);
-    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    padding: max(1rem, env(safe-area-inset-top)) 0 max(2rem, env(safe-area-inset-bottom));
+    font: 17px/1.47 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding: max(3.5rem, env(safe-area-inset-top)) 1.5rem max(3rem, env(safe-area-inset-bottom));
   }
-  .wrap { max-width: 32rem; margin: 0 auto; padding: 0 1.1rem; }
-  h1 { font-size: clamp(1.6rem, 7.5vw, 2.05rem); line-height: 1.15; margin: 0 0 .45rem; letter-spacing: -.02em; }
-  h1 em { color: var(--clay); font-style: normal; }
-  .lede { margin: 0 0 1.1rem; color: var(--muted); font-size: .95rem; }
-  .lede strong { color: var(--ink); font-variant-numeric: tabular-nums; }
+  main { max-width: 34rem; margin: 0 auto; }
 
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1rem;
-    margin-bottom: .9rem;
+  h1 {
+    font-size: clamp(1.9rem, 8vw, 2.75rem);
+    font-weight: 600;
+    letter-spacing: -.025em;
+    line-height: 1.1;
+    margin: 0 0 .5rem;
   }
-  .row { display: flex; align-items: flex-end; gap: .6rem; }
-  .row .field { flex: 1 1 auto; }
-  .lbl {
-    display: block;
-    font-size: .74rem;
-    text-transform: uppercase;
-    letter-spacing: .07em;
-    color: var(--muted);
-    margin-bottom: .35rem;
-  }
+  .caption { margin: 0 0 2.5rem; color: var(--muted); }
+
+  .field { margin-bottom: 1.5rem; }
+  .field-head { display: flex; align-items: center; justify-content: space-between; min-height: 2rem; margin-bottom: .5rem; }
+  .label { font-size: .8rem; letter-spacing: .02em; color: var(--muted); text-transform: uppercase; }
+
   input[type="number"] {
     width: 100%;
-    padding: .7rem .75rem;
-    font-size: 1.0625rem;
+    padding: .85rem 1rem;
+    font: inherit;
     font-variant-numeric: tabular-nums;
     color: var(--ink);
-    background: var(--bg);
-    border: 1px solid var(--line);
-    border-radius: 10px;
+    background: var(--field);
+    border: 0;
+    border-radius: 12px;
     -webkit-appearance: none;
     appearance: textfield;
   }
-  input[type="number"]:focus-visible { outline: 2px solid var(--clay); outline-offset: 1px; border-color: transparent; }
+  input[type="number"]:focus { outline: 2px solid var(--focus); outline-offset: 0; }
+  input[type="number"]::placeholder { color: var(--muted); }
   input[type="number"]::-webkit-outer-spin-button,
   input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
-  .seg { display: inline-flex; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 3px; }
+  .seg { display: inline-flex; background: var(--field); border-radius: 9px; padding: 2px; }
   .seg-btn {
-    min-width: 3.1rem;
-    min-height: 2.6rem;
-    padding: 0 .6rem;
+    min-width: 2.9rem;
+    min-height: 2.5rem;
+    padding: 0 .5rem;
     font: inherit;
-    font-size: .95rem;
+    font-size: .85rem;
     color: var(--muted);
     background: transparent;
     border: 0;
-    border-radius: 8px;
+    border-radius: 7px;
     cursor: pointer;
   }
-  .seg-btn[aria-pressed="true"] { background: var(--ink); color: var(--card); font-weight: 600; }
+  .seg-btn[aria-pressed="true"] { background: var(--bg); color: var(--ink); font-weight: 600; }
 
-  fieldset.time { border: 0; padding: 0; margin: 1rem 0 0; }
-  fieldset.time legend { padding: 0; margin-bottom: .35rem; }
-  .time-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .55rem; }
+  .time-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .75rem; }
   .time-grid input { text-align: center; }
 
   .verdict {
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--card);
-    padding: 1.05rem 1rem 1rem;
-    margin-bottom: .9rem;
+    margin: 2.75rem 0 0;
+    font-size: clamp(1.5rem, 6.5vw, 2rem);
+    font-weight: 600;
+    letter-spacing: -.02em;
+    min-height: 1.2em;
   }
-  .verdict[data-state="on"] { background: var(--good-bg); border-color: var(--good); }
-  .verdict[data-state="off"] { background: var(--bad-bg); border-color: var(--bad); }
-  .v-label {
-    margin: 0;
-    font-size: clamp(1.35rem, 6.5vw, 1.7rem);
-    font-weight: 700;
-    letter-spacing: -.01em;
-    line-height: 1.15;
-  }
-  .verdict[data-state="on"] .v-label { color: var(--good); }
-  .verdict[data-state="off"] .v-label { color: var(--bad); }
-  .verdict[data-state="idle"] .v-label { color: var(--muted); font-weight: 600; }
-  .v-sub { margin: .4rem 0 0; font-size: .95rem; color: var(--ink); }
-  .verdict[data-state="idle"] .v-sub { color: var(--muted); }
-
-  .stats { margin: .95rem 0 0; padding: .85rem 0 0; border-top: 1px solid var(--line); }
-  .stat { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; padding: .28rem 0; }
-  .stat[hidden] { display: none; }
-  .stat dt { color: var(--muted); font-size: .82rem; margin: 0; }
-  .stat dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; }
-  .stat dd .unit { color: var(--muted); font-weight: 400; font-size: .85em; }
-
-  .note { color: var(--muted); font-size: .8rem; margin: 0; }
-  .foot { margin-top: 1.4rem; text-align: center; color: var(--muted); font-size: .78rem; }
+  .verdict[data-state="on"] { color: var(--good); }
+  .verdict[data-state="off"] { color: var(--bad); }
+  .verdict[data-state="idle"] { color: var(--muted); }
+  .detail { margin: .5rem 0 0; color: var(--muted); min-height: 1.4em; }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>Are they gonna <em>PR</em>?</h1>
-  <p class="lede">Marathon PB to beat: <strong id="pbTime">2:47:34</strong> (<span id="pbPace">3:58.3/km</span>).
-    Enter how far you are and the clock — this says whether you're on pace.</p>
+<main>
+  <h1>Are they gonna PR?</h1>
+  <p class="caption">PB to beat <span id="pb">2:47:34</span></p>
 
-  <form class="card" id="form" autocomplete="off" novalidate>
-    <div class="row">
-      <label class="field" for="distance">
-        <span class="lbl">Distance covered</span>
-        <input id="distance" type="number" inputmode="decimal" step="any" min="0" placeholder="13.1">
-      </label>
+  <div class="field">
+    <div class="field-head">
+      <label class="label" for="distance">Distance</label>
       <div class="seg" role="group" aria-label="Distance unit">
         <button type="button" class="seg-btn" data-unit="km" aria-pressed="true">km</button>
         <button type="button" class="seg-btn" data-unit="mi" aria-pressed="false">mi</button>
       </div>
     </div>
+    <input id="distance" type="number" inputmode="decimal" step="any" min="0" placeholder="21.1">
+  </div>
 
-    <fieldset class="time">
-      <legend class="lbl">Elapsed time</legend>
-      <div class="time-grid">
-        <label><span class="lbl">hours</span><input id="th" type="number" inputmode="numeric" step="1" min="0" placeholder="0"></label>
-        <label><span class="lbl">min</span><input id="tm" type="number" inputmode="numeric" step="1" min="0" placeholder="0"></label>
-        <label><span class="lbl">sec</span><input id="ts" type="number" inputmode="numeric" step="1" min="0" placeholder="0"></label>
-      </div>
-    </fieldset>
-  </form>
+  <div class="field">
+    <div class="field-head"><span class="label" id="timeLabel">Time</span></div>
+    <div class="time-grid" role="group" aria-labelledby="timeLabel">
+      <input id="th" type="number" inputmode="numeric" step="1" min="0" placeholder="hh" aria-label="Hours">
+      <input id="tm" type="number" inputmode="numeric" step="1" min="0" placeholder="mm" aria-label="Minutes">
+      <input id="ts" type="number" inputmode="numeric" step="1" min="0" placeholder="ss" aria-label="Seconds">
+    </div>
+  </div>
 
-  <section class="verdict" id="verdict" data-state="idle" role="status" aria-live="polite">
-    <p class="v-label" id="vLabel">Give me numbers</p>
-    <p class="v-sub" id="vSub">Distance and elapsed time, then this updates as you run.</p>
-    <dl class="stats" id="stats">
-      <div class="stat" id="r1" hidden><dt id="l1">Projected finish</dt><dd id="d1">—</dd></div>
-      <div class="stat" id="r2" hidden><dt id="l2">vs PB</dt><dd id="d2">—</dd></div>
-      <div class="stat" id="r3" hidden><dt id="l3">Your average</dt><dd id="d3">—</dd></div>
-      <div class="stat" id="r4" hidden><dt id="l4">Needed from here</dt><dd id="d4">—</dd></div>
-    </dl>
-  </section>
-
-  <p class="note">Straight-line projection: it assumes you hold your average pace to the line. The official clock is what counts.</p>
-  <p class="foot">Built for a 2:47:34 marathon PB.</p>
-</div>
+  <p class="verdict" id="verdict" data-state="idle" role="status" aria-live="polite"></p>
+  <p class="detail" id="detail"></p>
+</main>
 
 <script src="pace.js"></script>
 <script>
@@ -189,26 +137,18 @@
   var $ = function (id) { return document.getElementById(id); };
   var distEl = $('distance'), thEl = $('th'), tmEl = $('tm'), tsEl = $('ts');
   var unitBtns = Array.prototype.slice.call(document.querySelectorAll('.seg-btn'));
-  var verdict = $('verdict'), vLabel = $('vLabel'), vSub = $('vSub');
+  var verdict = $('verdict'), detail = $('detail');
   var unit = 'km';
 
   function num(el) { var v = parseFloat(el.value); return isFinite(v) ? v : 0; }
   function clock(seconds) { return Pace.fmtClock(seconds); }
-  function pace(seconds, u) { return Pace.fmtPace(seconds) + '<span class="unit">/' + u + '</span>'; }
   /* distances coming out of Pace.analyze() are already in the chosen unit */
   function dist(value, u) { return value.toFixed(value < 1 ? 2 : 1) + ' ' + u; }
-  function row(i, label, value) {
-    var r = $('r' + i);
-    if (label === null) { r.hidden = true; return; }
-    $('l' + i).textContent = label;
-    $('d' + i).innerHTML = value;
-    r.hidden = false;
-  }
-  function set(label, sub, state, rows) {
-    vLabel.textContent = label;
-    vSub.innerHTML = sub;
+
+  function show(text, state, sub) {
+    verdict.textContent = text;
     verdict.setAttribute('data-state', state);
-    for (var i = 1; i <= 4; i++) row(i, rows[i - 1] ? rows[i - 1][0] : null, rows[i - 1] ? rows[i - 1][1] : '');
+    detail.textContent = sub || '';
   }
 
   function render() {
@@ -217,74 +157,33 @@
     var r = Pace.analyze(d, unit, seconds);
     var u = r.unit;
 
-    if (r.status === 'incomplete') {
-      set('Give me numbers', 'Distance and elapsed time, then this updates as you run.', 'idle', []);
-      return;
-    }
+    if (r.status === 'incomplete') { show('', 'idle', ''); return; }
 
     if (r.status === 'finished') {
       var over = r.delta >= 0;
-      set(
+      show(
         r.pr ? 'PR!' : 'No PR',
-        clock(r.seconds) + ' for ' + dist(r.fullDistance, u) + ' — ' + clock(Math.abs(r.delta)) + ' ' + (over ? 'over' : 'under') + ' the PB.',
         r.pr ? 'on' : 'off',
-        [
-          ['Finish time', clock(r.seconds)],
-          ['vs PB', clock(Math.abs(r.delta)) + ' <span class="unit">' + (over ? 'slower' : 'faster') + '</span>'],
-          ['Average pace', pace(r.avgPace, u)],
-          null
-        ]
+        clock(r.seconds) + ' for ' + dist(r.fullDistance, u) + ' — ' + clock(Math.abs(r.delta)) + (over ? ' over' : ' under') + ' the PB'
       );
       return;
     }
 
     if (r.status === 'impossible') {
-      set(
-        'PR out of reach',
-        'You have spent ' + clock(r.seconds) + ' — ' + clock(r.overSeconds) + ' longer than the whole PB — with ' + dist(r.remaining, u) + ' still to run.',
-        'off',
-        [
-          ['Elapsed', clock(r.seconds)],
-          ['vs PB', clock(r.overSeconds) + ' <span class="unit">past it</span>'],
-          ['Your average', pace(r.avgPace, u)],
-          null
-        ]
-      );
+      show('PR out of reach', 'off', clock(r.seconds) + ' elapsed with ' + dist(r.remaining, u) + ' to go');
+      return;
+    }
+
+    if (Math.abs(r.delta) < 1) {
+      show('Dead level', 'off', 'projected ' + clock(r.projected) + ' — exactly PB pace');
       return;
     }
 
     var ahead = r.delta < 0;
-
-    if (Math.abs(r.delta) < 1) {
-      set(
-        'Dead level',
-        'Projected ' + clock(r.projected) + ' — exactly PB pace, and a PR has to be under it.',
-        'off',
-        [
-          ['Projected finish', clock(r.projected)],
-          ['vs PB', 'level <span class="unit">(0:00)</span>'],
-          ['Your average', pace(r.avgPace, u)],
-          ['Needed from here', pace(r.requiredPace, u) + ' <span class="unit">for the last ' + dist(r.remaining, u) + '</span>']
-        ]
-      );
-      return;
-    }
-
-    var rows = [
-      ['Projected finish', clock(r.projected)],
-      ['vs PB', clock(Math.abs(r.delta)) + ' <span class="unit">' + (ahead ? 'under' : 'over') + '</span>'],
-      ['Your average', pace(r.avgPace, u)]
-    ];
-    if (ahead) {
-      rows.push(['You can slow to', pace(r.requiredPace, u) + ' <span class="unit">for the last ' + dist(r.remaining, u) + '</span>']);
-    } else {
-      rows.push(['Needed from here', pace(r.requiredPace, u) + ' <span class="unit">for the last ' + dist(r.remaining, u) + '</span>']);
-    }
-    set(
+    show(
       r.status === 'on' ? 'On pace' : 'Off pace',
-      'Projected ' + clock(r.projected) + ' — ' + clock(Math.abs(r.delta)) + (ahead ? ' under' : ' over') + ' the PB.',
       r.status === 'on' ? 'on' : 'off',
-      rows
+      'projected ' + clock(r.projected) + ' — ' + clock(Math.abs(r.delta)) + (ahead ? ' under' : ' over') + ' the PB'
     );
   }
 
@@ -298,9 +197,7 @@
     });
   });
 
-  $('pbTime').textContent = clock(Pace.PB_SECONDS);
-  $('pbPace').textContent = Pace.fmtPace(Pace.PB_SECONDS / Pace.MARATHON_KM) + '/km · ' +
-    Pace.fmtPace(Pace.PB_SECONDS / Pace.MARATHON_MI) + '/mi';
+  $('pb').textContent = clock(Pace.PB_SECONDS);
   render();
 }());
 </script>

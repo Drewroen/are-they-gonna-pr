@@ -1,6 +1,6 @@
 # are-they-gonna-pr
 
-A one-page marathon pace checker. Enter how far you are and your elapsed time; it tells you whether you are on pace to beat the **2:47:34** PB (42.195 km / 26.21875 mi — an even split of 3:58.3/km or 6:23.5/mi).
+One page, two inputs. Type where you are and the clock; it says whether you are on pace to beat the **2:47:34** marathon PB (42.195 km / 26.21875 mi — an even split of 3:58.3/km or 6:23.5/mi).
 
 Live: https://drewroen.github.io/are-they-gonna-pr/
 
@@ -14,11 +14,11 @@ Live: https://drewroen.github.io/are-they-gonna-pr/
 - `requiredPace = (PB − t) / (marathon − d)` — the fastest average that still wins, i.e. the most you can afford to slow down (or the pace you must hold) for the rest
 - `t ≥ PB` with distance left is reported as *PR out of reach*, not as a pace
 
-Shortcuts: miles are converted with `KM_PER_MI = 1.609344`, and the marathon is always defined in km (`42.195`) with miles derived, so the two unit modes can never disagree.
+Miles are converted with `KM_PER_MI = 1.609344`; the marathon is defined in km (`42.195`) with miles derived, so the two unit modes can never disagree.
 
 ## Files
 
-- `index.html` — the page: markup, styles and the DOM wiring (no build step, no framework)
+- `index.html` — the page: markup, styles and DOM wiring (no build step, no framework)
 - `pace.js` — the pace math (browser global `Pace` / `require('pace.js')`)
 - `tests/pace.test.js` — 18 tests, plain `assert`
 - `README.md`
