@@ -1,6 +1,6 @@
 # are-they-gonna-pr
 
-One page, two inputs. Type where you are and the clock; it says whether you are on pace to beat the **2:47:34** marathon PB (42.195 km / 26.21875 mi — an even split of 3:58.3/km or 6:23.5/mi).
+One page, two inputs: *They hit 13.1 miles ⇄ in 1 hours, 23 minutes and 47 seconds.* Type where you are and the clock; it says whether you are on pace to beat the **2:47:34** marathon PB (42.195 km / 26.21875 mi — an even split of 3:58.3/km or 6:23.5/mi).
 
 Live: https://drewroen.github.io/are-they-gonna-pr/
 
@@ -20,6 +20,7 @@ Miles are converted with `KM_PER_MI = 1.609344`; the marathon is defined in km (
 
 - `index.html` — the page: markup, styles and DOM wiring (no build step, no framework)
 - `pace.js` — the pace math (browser global `Pace` / `require('pace.js')`)
+- `fonts/` — Instrument Sans woff2 subsets + `OFL.txt` (SIL Open Font License 1.1); self-hosted so the rendering is identical on every device
 - `tests/pace.test.js` — 18 tests, plain `assert`
 - `README.md`
 
