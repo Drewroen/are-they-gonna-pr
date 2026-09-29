@@ -14,6 +14,7 @@
     --ink: #1d1d1f;
     --muted: #6e6e73;
     --line: #d2d2d7;
+    --chip: #f0f0f2;
     --good: #248a3d;
     --bad: #d70015;
     --focus: #0071e3;
@@ -24,6 +25,7 @@
       --ink: #f5f5f7;
       --muted: #86868b;
       --line: #424245;
+      --chip: #2c2c2e;
       --good: #30d158;
       --bad: #ff453a;
     }
@@ -46,20 +48,24 @@
     font-weight: 600;
     letter-spacing: -.025em;
     line-height: 1.1;
-    margin: 0 0 3.25rem;
+    margin: 0 0 3rem;
   }
 
-  .entry { font-size: 1.3125rem; }
-  .line {
+  /* one sentence: "They hit 13.1 miles ⇄ in 1 hours, 23 minutes and 47 seconds" */
+  .sentence {
     display: flex;
+    flex-wrap: wrap;
     align-items: baseline;
     justify-content: center;
-    flex-wrap: wrap;
-    gap: .5rem .45rem;
-    margin-bottom: 1.75rem;
+    gap: .3rem .4rem;
+    margin: 0 0 2.5rem;
+    font-size: clamp(.85rem, 4.5vw, 1.2rem);
+    line-height: 1.7;
   }
-  .pair { display: inline-flex; align-items: baseline; gap: .3rem; white-space: nowrap; }
-  .word { font-size: .72em; color: var(--muted); }
+  .tail { display: inline-flex; align-items: baseline; gap: .4rem; white-space: nowrap; }
+  .times { display: inline-flex; align-items: baseline; gap: .4rem; }
+  .pair { display: inline-flex; align-items: baseline; gap: .25rem; white-space: nowrap; }
+  .unit { display: inline-flex; align-items: center; gap: .1rem; }
 
   /* fill-in-the-blank fields: plain numbers over a thin rule */
   input[type="number"] {
@@ -71,41 +77,41 @@
     border: 0;
     border-bottom: 2px solid var(--line);
     border-radius: 0;
-    padding: 0 .1rem .3rem;
+    padding: 0 .1rem .25rem;
     -webkit-appearance: none;
     appearance: textfield;
   }
   input[type="number"]:focus { outline: 0; border-bottom-color: var(--focus); }
   input[type="number"]::-webkit-outer-spin-button,
   input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-  .n-dist { width: 6ch; }
-  .n-time { width: 2.7ch; }
+  .n-dist { width: 5.5ch; }
+  .n-time { width: 2.5ch; }
 
-  /* the unit doubles as the toggle: "10 mi" → tap mi for km */
-  .unit-btn {
-    font: inherit;
+  /* unit switch */
+  .swap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    width: 2.1rem;
+    height: 2.1rem;
+    padding: 0;
     color: var(--muted);
-    background: none;
+    background: transparent;
     border: 0;
-    padding: .25rem 0;
+    border-radius: 50%;
     cursor: pointer;
-    text-decoration: underline dotted;
-    text-decoration-color: var(--line);
-    text-underline-offset: .32em;
     -webkit-tap-highlight-color: transparent;
   }
+  .swap:hover, .swap:focus-visible { background: var(--chip); color: var(--ink); outline: 0; }
+  .swap svg { display: block; }
 
   .verdict {
-    margin: 2.25rem 0 0;
+    margin: 0;
     font-size: clamp(1.5rem, 6.5vw, 2rem);
     font-weight: 600;
     letter-spacing: -.02em;
     min-height: 1.2em;
-  }
-  /* keep "…hours, …minutes and …seconds" on one line on the narrowest phones */
-  @media (max-width: 360px) {
-    .entry { font-size: 1.15rem; }
-    .line { gap: .5rem .35rem; }
   }
   .verdict[data-state="on"] { color: var(--good); }
   .verdict[data-state="off"] { color: var(--bad); }
@@ -116,18 +122,27 @@
 <main>
   <h1>Are they gonna PR?</h1>
 
-  <div class="entry">
-    <div class="line">
-      <input id="distance" class="n-dist" type="number" inputmode="decimal" step="any" min="0" aria-label="Distance covered">
-      <button type="button" class="unit-btn" id="unitBtn" aria-label="Switch distance unit to kilometres">mi</button>
-    </div>
-
-    <div class="line" role="group" aria-label="Elapsed time">
-      <span class="pair"><input id="th" class="n-time" type="number" inputmode="numeric" step="1" min="0" aria-label="Hours"><span class="word">hours,</span></span>
-      <span class="pair"><input id="tm" class="n-time" type="number" inputmode="numeric" step="1" min="0" aria-label="Minutes"><span class="word">minutes and</span></span>
-      <span class="pair"><input id="ts" class="n-time" type="number" inputmode="numeric" step="1" min="0" aria-label="Seconds"><span class="word">seconds</span></span>
-    </div>
-  </div>
+  <p class="sentence">
+    <span>They hit</span>
+    <input id="distance" class="n-dist" type="number" inputmode="decimal" step="any" min="0" aria-label="Distance covered">
+    <span class="unit">
+      <span id="unitWord">miles</span>
+      <button type="button" class="swap" id="swapBtn" aria-label="Switch distance unit to kilometers">
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path d="M2.2 5.4h11.6M10.9 2.6l2.9 2.8-2.9 2.8M13.8 10.6H2.2M5.1 7.8l-2.9 2.8 2.9 2.8"
+                fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </span>
+    <span class="tail">
+      <span>in</span>
+      <span class="times" role="group" aria-label="Elapsed time">
+        <span class="pair"><input id="th" class="n-time" type="number" inputmode="numeric" step="1" min="0" aria-label="Hours"><span>hours,</span></span>
+        <span class="pair"><input id="tm" class="n-time" type="number" inputmode="numeric" step="1" min="0" aria-label="Minutes"><span>minutes and</span></span>
+        <span class="pair"><input id="ts" class="n-time" type="number" inputmode="numeric" step="1" min="0" aria-label="Seconds"><span>seconds</span></span>
+      </span>
+    </span>
+  </p>
 
   <p class="verdict" id="verdict" data-state="idle" role="status" aria-live="polite"></p>
 </main>
@@ -138,9 +153,10 @@
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
   var distEl = $('distance'), thEl = $('th'), tmEl = $('tm'), tsEl = $('ts');
-  var unitBtn = $('unitBtn');
+  var unitWord = $('unitWord'), swapBtn = $('swapBtn');
   var verdict = $('verdict');
-  var unit = unitBtn.textContent.trim() === 'km' ? 'km' : 'mi';
+  var WORDS = { mi: 'miles', km: 'kilometers' };
+  var unit = unitWord.textContent.trim() === WORDS.km ? 'km' : 'mi';
 
   function num(el) { var v = parseFloat(el.value); return isFinite(v) ? v : 0; }
 
@@ -163,14 +179,14 @@
 
   function setUnit(next) {
     unit = next;
-    unitBtn.textContent = next;
-    unitBtn.setAttribute('aria-label', 'Switch distance unit to ' + (next === 'mi' ? 'kilometres' : 'miles'));
+    unitWord.textContent = WORDS[next];
+    swapBtn.setAttribute('aria-label', 'Switch distance unit to ' + WORDS[next === 'mi' ? 'km' : 'mi']);
     render();
   }
 
   distEl.addEventListener('input', render);
   [thEl, tmEl, tsEl].forEach(function (el) { el.addEventListener('input', render); });
-  unitBtn.addEventListener('click', function () { setUnit(unit === 'mi' ? 'km' : 'mi'); });
+  swapBtn.addEventListener('click', function () { setUnit(unit === 'mi' ? 'km' : 'mi'); });
 
   render();
 }());
