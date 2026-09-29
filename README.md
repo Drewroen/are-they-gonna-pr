@@ -13,6 +13,7 @@ Live: https://drewroen.github.io/are-they-gonna-pr/
 - `onPace = projected < PB` — a tie is not a PR
 - `requiredPace = (PB − t) / (marathon − d)` — the fastest average that still wins, i.e. the most you can afford to slow down (or the pace you must hold) for the rest
 - `t ≥ PB` with distance left is reported as *PR out of reach*, not as a pace
+- rounded race distances are treated as the real thing: 26.2 mi / 42.2 km snap to the marathon, 13.1 mi / 21.1 km to the half (within 0.15%), so a PB-pace 26.2 is not read as 7s slow
 
 Miles are converted with `KM_PER_MI = 1.609344`; the marathon is defined in km (`42.195`) with miles derived, so the two unit modes can never disagree.
 

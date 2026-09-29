@@ -194,6 +194,40 @@ test('tiers as races really land', function () {
   assert.strictEqual(Pace.verdictFor(Pace.analyze(40, 'km', 10060)).text, 'Not today');          // past PB time
 });
 
+// --- rounded race distances -------------------------------------------------
+test('26.2 miles means the marathon, not 26.200', function () {
+  assert.strictEqual(Pace.snapDistance(26.2, 'mi'), Pace.MARATHON_MI);
+  assert.strictEqual(Pace.snapDistance(13.1, 'mi'), Pace.MARATHON_MI / 2);
+  assert.strictEqual(Pace.snapDistance(42.2, 'km'), Pace.MARATHON_KM);
+  assert.strictEqual(Pace.snapDistance(21.1, 'km'), Pace.MARATHON_KM / 2);
+  assert.strictEqual(Pace.snapDistance(26, 'mi'), 26, 'a plain 26 stays 26');
+  assert.strictEqual(Pace.snapDistance(26.5, 'mi'), 26.5, 'so does 26.5');
+  assert.strictEqual(Pace.snapDistance(42, 'km'), 42);
+  assert.strictEqual(Pace.snapDistance(0, 'mi'), 0);
+});
+test('a PB-pace 26.2 is level, not 7s slow', function () {
+  var r = Pace.analyze(26.2, 'mi', Pace.PB_SECONDS);
+  assert.strictEqual(r.status, 'finished');
+  assert.strictEqual(r.pr, false, 'level is not a PR');
+  assert.strictEqual(r.delta, 0);
+  assert.strictEqual(Pace.gapTextFor(r), 'right on the PB');
+});
+test('a PB-pace 42.2km reads the same as a PB-pace 26.2mi', function () {
+  var mi = Pace.analyze(26.2, 'mi', Pace.PB_SECONDS - 60);
+  var km = Pace.analyze(42.2, 'km', Pace.PB_SECONDS - 60);
+  assert.strictEqual(mi.status, 'finished');
+  assert.strictEqual(km.status, 'finished');
+  assert.strictEqual(mi.delta, -60);
+  assert.strictEqual(km.delta, -60);
+  assert.strictEqual(Pace.verdictFor(mi).text, 'PR!');
+  assert.strictEqual(Pace.verdictFor(km).text, 'PR!');
+});
+test('a real 26.2 (not the marathon) still projects', function () {
+  var r = Pace.analyze(26, 'mi', 7200);
+  assert.strictEqual(r.status, 'on');
+  close(r.avgPace, 7200 / 26, 1e-9, 'avg pace');
+});
+
 if (failures) {
   console.log('\n' + failures + ' test(s) failed');
   process.exit(1);

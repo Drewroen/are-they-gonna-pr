@@ -16,6 +16,23 @@
 
   function distanceFor(unit) { return unit === 'mi' ? MARATHON_MI : MARATHON_KM; }
 
+  /* Rounded race distances ("26.2", "13.1") are shorthand for the real thing.
+     Snapping them keeps a PB-pace marathon from reading 7s slow just because
+     a marathon is 26.2188 miles, not 26.2. */
+  var STANDARD = {
+    mi: [MARATHON_MI, MARATHON_MI / 2],
+    km: [MARATHON_KM, MARATHON_KM / 2]
+  };
+  var SNAP_TOLERANCE = 0.0015; // 0.15%
+
+  function snapDistance(d, unit) {
+    var list = STANDARD[unit] || [];
+    for (var i = 0; i < list.length; i++) {
+      if (d !== list[i] && Math.abs(d - list[i]) / list[i] <= SNAP_TOLERANCE) return list[i];
+    }
+    return d;
+  }
+
   /* "2:47:34" / "6:23.5" — seconds under an hour print as m:ss */
   function fmtClock(totalSeconds) {
     var s = Math.round(totalSeconds);
@@ -59,6 +76,7 @@
     var D = distanceFor(u);
     var d = Number(distance);
     var t = Number(seconds);
+    if (isFinite(d) && d > 0) d = snapDistance(d, u);
 
     var base = {
       pbSeconds: PB_SECONDS,
@@ -141,6 +159,7 @@
     PB: PB,
     PB_SECONDS: PB_SECONDS,
     distanceFor: distanceFor,
+    snapDistance: snapDistance,
     analyze: analyze,
     verdictFor: verdictFor,
     gapTextFor: gapTextFor,
