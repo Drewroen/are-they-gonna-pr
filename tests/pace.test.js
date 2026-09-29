@@ -227,6 +227,23 @@ test('a real 26.2 (not the marathon) still projects', function () {
   assert.strictEqual(r.status, 'on');
   close(r.avgPace, 7200 / 26, 1e-9, 'avg pace');
 });
+test('converting units keeps standard distances exact', function () {
+  close(Pace.convertDistance(26.2, 'mi', 'km'), 42.195, 1e-9, '26.2 mi -> marathon km');
+  close(Pace.convertDistance(13.1, 'mi', 'km'), 21.0975, 1e-9, '13.1 mi -> half km');
+  close(Pace.convertDistance(42.2, 'km', 'mi'), Pace.MARATHON_MI, 1e-9, '42.2 km -> marathon mi');
+  close(Pace.convertDistance(10, 'km', 'mi'), 10 / 1.609344, 1e-9, 'a plain 10 km');
+  close(Pace.convertDistance(Pace.MARATHON_MI, 'mi', 'mi'), Pace.MARATHON_MI, 1e-9, 'same unit is a no-op');
+  assert.strictEqual(Pace.convertDistance(0, 'mi', 'km'), 0);
+});
+test('fmtDistance writes standard distances back in their familiar form', function () {
+  assert.strictEqual(Pace.fmtDistance(42.195, 'km'), '42.2');
+  assert.strictEqual(Pace.fmtDistance(21.0975, 'km'), '21.1');
+  assert.strictEqual(Pace.fmtDistance(26.218757, 'mi'), '26.2');
+  assert.strictEqual(Pace.fmtDistance(13.109379, 'mi'), '13.1');
+  assert.strictEqual(Pace.fmtDistance(10, 'km'), '10');
+  assert.strictEqual(Pace.fmtDistance(6.21371, 'mi'), '6.21');
+  assert.strictEqual(Pace.fmtDistance(9.5, 'mi'), '9.5');
+});
 
 if (failures) {
   console.log('\n' + failures + ' test(s) failed');

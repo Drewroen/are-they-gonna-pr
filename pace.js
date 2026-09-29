@@ -33,6 +33,29 @@
     return d;
   }
 
+  /* the same distance in the other unit, with rounded race distances kept exact */
+  function convertDistance(d, fromUnit, toUnit) {
+    if (!isFinite(d) || d <= 0) return d;
+    var km = snapDistance(d, fromUnit === 'mi' ? 'mi' : 'km') * (fromUnit === 'mi' ? KM_PER_MI : 1);
+    return toUnit === 'mi' ? km / KM_PER_MI : km;
+  }
+
+  /* How a distance is written back into the field: standard race distances get
+     their familiar name (26.2 / 42.2 / 13.1 / 21.1), everything else rounds. */
+  var SHORTHAND = {
+    mi: [['26.2', MARATHON_MI], ['13.1', MARATHON_MI / 2]],
+    km: [['42.2', MARATHON_KM], ['21.1', MARATHON_KM / 2]]
+  };
+
+  function fmtDistance(v, unit) {
+    var list = SHORTHAND[unit === 'mi' ? 'mi' : 'km'];
+    for (var i = 0; i < list.length; i++) {
+      if (Math.abs(v - list[i][1]) / list[i][1] <= SNAP_TOLERANCE) return list[i][0];
+    }
+    if (Math.abs(v - Math.round(v)) < 0.005) return String(Math.round(v));
+    return String(Math.round(v * 100) / 100);
+  }
+
   /* "2:47:34" / "6:23.5" — seconds under an hour print as m:ss */
   function fmtClock(totalSeconds) {
     var s = Math.round(totalSeconds);
@@ -160,6 +183,8 @@
     PB_SECONDS: PB_SECONDS,
     distanceFor: distanceFor,
     snapDistance: snapDistance,
+    convertDistance: convertDistance,
+    fmtDistance: fmtDistance,
     analyze: analyze,
     verdictFor: verdictFor,
     gapTextFor: gapTextFor,

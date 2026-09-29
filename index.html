@@ -92,7 +92,6 @@
   .tail { display: inline-flex; align-items: baseline; gap: .4rem; white-space: nowrap; }
   .times { display: inline-flex; align-items: baseline; gap: .4rem; }
   .pair { display: inline-flex; align-items: baseline; gap: .25rem; white-space: nowrap; }
-  .unit { display: inline-flex; align-items: center; gap: .1rem; }
 
   /* fill-in-the-blank fields: plain numbers over a thin rule */
   input[type="number"] {
@@ -115,24 +114,24 @@
   .n-dist { width: 5.5ch; }
   .n-time { width: 2.5ch; }
 
-  /* unit switch */
-  .swap {
+  /* the unit word is the switch: tap "miles ⇄" and the number converts with it */
+  .unit-switch {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    align-self: center;
-    width: 2.1rem;
-    height: 2.1rem;
-    padding: 0;
-    color: var(--muted);
+    gap: .3rem;
+    font: inherit;
+    color: var(--ink);
     background: transparent;
     border: 0;
-    border-radius: 50%;
+    border-radius: 999px;
+    padding: .45rem .55rem;
+    margin: -.45rem -.55rem;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
+    transition: background-color .15s ease;
   }
-  .swap:hover, .swap:focus-visible { background: var(--chip); color: var(--ink); outline: 0; }
-  .swap svg { display: block; }
+  .unit-switch:hover, .unit-switch:focus-visible { background: var(--chip); outline: 0; }
+  .unit-switch svg { display: block; flex: none; color: var(--muted); }
 
   .verdict {
     margin: 0;
@@ -159,15 +158,13 @@
   <p class="sentence">
     <span>He hit</span>
     <input id="distance" class="n-dist" type="number" inputmode="decimal" step="any" min="0" aria-label="Distance covered">
-    <span class="unit">
+    <button type="button" class="unit-switch" id="unitBtn" aria-label="Switch to kilometers">
       <span id="unitWord">miles</span>
-      <button type="button" class="swap" id="swapBtn" aria-label="Switch distance unit to kilometers">
-        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-          <path d="M2.2 5.4h11.6M10.9 2.6l2.9 2.8-2.9 2.8M13.8 10.6H2.2M5.1 7.8l-2.9 2.8 2.9 2.8"
-                fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
-    </span>
+      <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+        <path d="M2.2 5.4h11.6M10.9 2.6l2.9 2.8-2.9 2.8M13.8 10.6H2.2M5.1 7.8l-2.9 2.8 2.9 2.8"
+              fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
     <span class="tail">
       <span>in</span>
       <span class="times" role="group" aria-label="Elapsed time">
@@ -188,10 +185,11 @@
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
   var distEl = $('distance'), thEl = $('th'), tmEl = $('tm'), tsEl = $('ts');
-  var unitWord = $('unitWord'), swapBtn = $('swapBtn');
+  var unitWord = $('unitWord'), unitBtn = $('unitBtn');
   var verdict = $('verdict'), detail = $('detail');
   var WORDS = { mi: 'miles', km: 'kilometers' };
   var unit = unitWord.textContent.trim() === WORDS.km ? 'km' : 'mi';
+  var km = null; // the last typed distance, kept in km so switching units never drifts
 
   function num(el) { var v = parseFloat(el.value); return isFinite(v) ? v : 0; }
 
@@ -203,6 +201,11 @@
 
   function filled(el) { return el.value.trim() !== ''; }
 
+  function rememberTyped() {
+    var v = parseFloat(distEl.value);
+    km = (isFinite(v) && v > 0) ? Pace.convertDistance(v, unit, 'km') : null;
+  }
+
   function render() {
     // no answer until every field has something in it
     if (!filled(distEl) || !filled(thEl) || !filled(tmEl) || !filled(tsEl)) { show('', 'idle', ''); return; }
@@ -212,15 +215,18 @@
   }
 
   function setUnit(next) {
+    if (next === unit) return;
     unit = next;
     unitWord.textContent = WORDS[next];
-    swapBtn.setAttribute('aria-label', 'Switch distance unit to ' + WORDS[next === 'mi' ? 'km' : 'mi']);
+    unitBtn.setAttribute('aria-label', 'Switch to ' + WORDS[next === 'mi' ? 'km' : 'mi']);
+    // take the number with you, so the entry means the same race either way
+    if (km !== null) distEl.value = Pace.fmtDistance(Pace.convertDistance(km, 'km', next), next);
     render();
   }
 
-  distEl.addEventListener('input', render);
+  distEl.addEventListener('input', function () { rememberTyped(); render(); });
   [thEl, tmEl, tsEl].forEach(function (el) { el.addEventListener('input', render); });
-  swapBtn.addEventListener('click', function () { setUnit(unit === 'mi' ? 'km' : 'mi'); });
+  unitBtn.addEventListener('click', function () { setUnit(unit === 'mi' ? 'km' : 'mi'); });
 
   render();
 }());
