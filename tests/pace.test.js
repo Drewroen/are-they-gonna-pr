@@ -174,11 +174,21 @@ test('verdict for the special statuses', function () {
   assert.strictEqual(Pace.verdictFor({ status: 'impossible', projected: 99999, pbSeconds: 10054, delta: 90000 }).text, 'Not today');
   assert.strictEqual(Pace.verdictFor({ status: 'finished', pr: true }).text, 'PR!');
   assert.strictEqual(Pace.verdictFor({ status: 'finished', pr: false }).text, 'No PR');
-  assert.strictEqual(Pace.verdictFor({ status: 'on', projected: 10054, pbSeconds: 10054, delta: 0 }).text, 'Dead level');
+  // dead on the PB is not a PR, so it sits in the behind bucket - never a label of its own
+  assert.strictEqual(Pace.verdictFor({ status: 'on', projected: 10054, pbSeconds: 10054, delta: 0 }).text, 'Slightly behind pace');
+});
+test('the estimate under the verdict', function () {
+  assert.strictEqual(Pace.gapTextFor(Pace.analyze(20, 'mi', 7200)), '10:15 under the PB');
+  assert.strictEqual(Pace.gapTextFor(Pace.analyze(10, 'km', 2400)), '1:13 over the PB');
+  assert.strictEqual(Pace.gapTextFor(Pace.analyze(42.195, 'km', 10000)), '0:54 under the PB');
+  assert.strictEqual(Pace.gapTextFor(Pace.analyze(42.195, 'km', 10100)), '0:46 over the PB');
+  assert.strictEqual(Pace.gapTextFor(Pace.analyze(40, 'km', 10060)), '0:06 past the PB');
+  assert.strictEqual(Pace.gapTextFor(Pace.analyze(21.0975, 'km', 5027)), 'right on the PB');
+  assert.strictEqual(Pace.gapTextFor(Pace.analyze(0, 'km', 0)), '');
 });
 test('tiers as races really land', function () {
   assert.strictEqual(Pace.verdictFor(Pace.analyze(10, 'km', 2400)).text, 'Slightly behind pace'); // 10k in 40:00
-  assert.strictEqual(Pace.verdictFor(Pace.analyze(21.0975, 'km', 5027)).text, 'Dead level');      // half at PB pace
+  assert.strictEqual(Pace.verdictFor(Pace.analyze(21.0975, 'km', 5027)).text, 'Slightly behind pace'); // half at PB pace
   assert.strictEqual(Pace.verdictFor(Pace.analyze(20, 'mi', 7200)).text, 'On pace for a big PR');// 20mi in 2:00
   assert.strictEqual(Pace.verdictFor(Pace.analyze(5, 'km', 1440)).text, 'Not today');            // 5k in 24:00
   assert.strictEqual(Pace.verdictFor(Pace.analyze(40, 'km', 10060)).text, 'Not today');          // past PB time

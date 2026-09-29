@@ -144,6 +144,12 @@
   .verdict[data-state="on"] { color: var(--good); }
   .verdict[data-state="off"] { color: var(--bad); }
   .verdict[data-state="idle"] { color: var(--muted); }
+  .detail {
+    margin: .65rem 0 0;
+    font-size: clamp(.95rem, 4vw, 1.15rem);
+    color: var(--muted);
+    min-height: 1.5em;
+  }
 </style>
 </head>
 <body>
@@ -173,6 +179,7 @@
   </p>
 
   <p class="verdict" id="verdict" data-state="idle" role="status" aria-live="polite"></p>
+  <p class="detail" id="detail"></p>
 </main>
 
 <script src="pace.js"></script>
@@ -182,26 +189,26 @@
   var $ = function (id) { return document.getElementById(id); };
   var distEl = $('distance'), thEl = $('th'), tmEl = $('tm'), tsEl = $('ts');
   var unitWord = $('unitWord'), swapBtn = $('swapBtn');
-  var verdict = $('verdict');
+  var verdict = $('verdict'), detail = $('detail');
   var WORDS = { mi: 'miles', km: 'kilometers' };
   var unit = unitWord.textContent.trim() === WORDS.km ? 'km' : 'mi';
 
   function num(el) { var v = parseFloat(el.value); return isFinite(v) ? v : 0; }
 
-  function show(text, state) {
+  function show(text, state, sub) {
     verdict.textContent = text;
     verdict.setAttribute('data-state', state);
+    detail.textContent = sub || '';
   }
 
   function filled(el) { return el.value.trim() !== ''; }
 
   function render() {
     // no answer until every field has something in it
-    if (!filled(distEl) || !filled(thEl) || !filled(tmEl) || !filled(tsEl)) { show('', 'idle'); return; }
-    var d = num(distEl);
-    var seconds = num(thEl) * 3600 + num(tmEl) * 60 + num(tsEl);
-    var v = Pace.verdictFor(Pace.analyze(d, unit, seconds));
-    show(v.text, v.tone);
+    if (!filled(distEl) || !filled(thEl) || !filled(tmEl) || !filled(tsEl)) { show('', 'idle', ''); return; }
+    var r = Pace.analyze(num(distEl), unit, num(thEl) * 3600 + num(tmEl) * 60 + num(tsEl));
+    var v = Pace.verdictFor(r);
+    show(v.text, v.tone, Pace.gapTextFor(r));
   }
 
   function setUnit(next) {

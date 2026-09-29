@@ -110,20 +110,28 @@
    * The verdict in words, tiered by how far the projection is from the PB:
    *   10%+ behind -> "Not today"            5-10% behind -> "Falling off pace"
    *   0-5% behind -> "Slightly behind pace" 0-5% ahead   -> "On pace for a small PR"
-   *   5%+ ahead   -> "On pace for a big PR" dead level   -> "Dead level"
+   *   5%+ ahead   -> "On pace for a big PR"
    */
   function verdictFor(r) {
     if (!r || r.status === 'incomplete') return { text: '', tone: 'idle' };
     if (r.status === 'finished') return r.pr ? { text: 'PR!', tone: 'on' } : { text: 'No PR', tone: 'off' };
     if (r.status === 'impossible') return { text: 'Not today', tone: 'off' };
-    if (Math.abs(r.delta) < 1) return { text: 'Dead level', tone: 'off' };
 
     var pct = (r.projected - r.pbSeconds) / r.pbSeconds * 100;
     if (pct >= 10) return { text: 'Not today', tone: 'off' };
     if (pct >= 5) return { text: 'Falling off pace', tone: 'off' };
-    if (pct > 0) return { text: 'Slightly behind pace', tone: 'off' };
+    // a projection dead on the PB counts as behind: a PR has to be under it
+    if (pct >= 0) return { text: 'Slightly behind pace', tone: 'off' };
     if (pct > -5) return { text: 'On pace for a small PR', tone: 'on' };
     return { text: 'On pace for a big PR', tone: 'on' };
+  }
+
+  /* the estimate under the verdict: how far ahead of or behind the PB it lands */
+  function gapTextFor(r) {
+    if (!r || r.status === 'incomplete') return '';
+    if (r.status === 'impossible') return fmtClock(r.overSeconds) + ' past the PB';
+    if (Math.abs(r.delta) < 0.5) return 'right on the PB';
+    return fmtClock(Math.abs(r.delta)) + (r.delta < 0 ? ' under the PB' : ' over the PB');
   }
 
   return {
@@ -135,6 +143,7 @@
     distanceFor: distanceFor,
     analyze: analyze,
     verdictFor: verdictFor,
+    gapTextFor: gapTextFor,
     fmtClock: fmtClock,
     fmtPace: fmtPace,
     fmtGap: fmtGap
