@@ -36,7 +36,8 @@
     color: var(--ink);
     font: 17px/1.47 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
-    padding: max(3.5rem, env(safe-area-inset-top)) 1.5rem max(3rem, env(safe-area-inset-bottom));
+    text-align: center;
+    padding: max(4.5rem, env(safe-area-inset-top)) 1.25rem max(3rem, env(safe-area-inset-bottom));
   }
   main { max-width: 34rem; margin: 0 auto; }
 
@@ -45,20 +46,20 @@
     font-weight: 600;
     letter-spacing: -.025em;
     line-height: 1.1;
-    margin: 0 0 .5rem;
+    margin: 0 0 3.25rem;
   }
-  .caption { margin: 0 0 2.75rem; color: var(--muted); }
 
-  .entry { font-size: 1.375rem; }
+  .entry { font-size: 1.3125rem; }
   .line {
     display: flex;
     align-items: baseline;
+    justify-content: center;
     flex-wrap: wrap;
-    gap: .6rem .55rem;
-    margin-bottom: 1.6rem;
+    gap: .5rem .45rem;
+    margin-bottom: 1.75rem;
   }
-  .pair { display: inline-flex; align-items: baseline; gap: .4rem; white-space: nowrap; }
-  .word { color: var(--ink); }
+  .pair { display: inline-flex; align-items: baseline; gap: .3rem; white-space: nowrap; }
+  .word { font-size: .72em; color: var(--muted); }
 
   /* fill-in-the-blank fields: plain numbers over a thin rule */
   input[type="number"] {
@@ -78,7 +79,7 @@
   input[type="number"]::-webkit-outer-spin-button,
   input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
   .n-dist { width: 6ch; }
-  .n-time { width: 2.8ch; }
+  .n-time { width: 2.7ch; }
 
   /* the unit doubles as the toggle: "10 mi" → tap mi for km */
   .unit-btn {
@@ -95,22 +96,25 @@
   }
 
   .verdict {
-    margin: 2rem 0 0;
+    margin: 2.25rem 0 0;
     font-size: clamp(1.5rem, 6.5vw, 2rem);
     font-weight: 600;
     letter-spacing: -.02em;
     min-height: 1.2em;
   }
+  /* keep "…hours, …minutes and …seconds" on one line on the narrowest phones */
+  @media (max-width: 360px) {
+    .entry { font-size: 1.15rem; }
+    .line { gap: .5rem .35rem; }
+  }
   .verdict[data-state="on"] { color: var(--good); }
   .verdict[data-state="off"] { color: var(--bad); }
   .verdict[data-state="idle"] { color: var(--muted); }
-  .detail { margin: .5rem 0 0; color: var(--muted); min-height: 1.4em; }
 </style>
 </head>
 <body>
 <main>
   <h1>Are they gonna PR?</h1>
-  <p class="caption">PB to beat <span id="pb">2:47:34</span></p>
 
   <div class="entry">
     <div class="line">
@@ -126,7 +130,6 @@
   </div>
 
   <p class="verdict" id="verdict" data-state="idle" role="status" aria-live="polite"></p>
-  <p class="detail" id="detail"></p>
 </main>
 
 <script src="pace.js"></script>
@@ -136,54 +139,26 @@
   var $ = function (id) { return document.getElementById(id); };
   var distEl = $('distance'), thEl = $('th'), tmEl = $('tm'), tsEl = $('ts');
   var unitBtn = $('unitBtn');
-  var verdict = $('verdict'), detail = $('detail');
+  var verdict = $('verdict');
   var unit = unitBtn.textContent.trim() === 'km' ? 'km' : 'mi';
 
   function num(el) { var v = parseFloat(el.value); return isFinite(v) ? v : 0; }
-  function clock(seconds) { return Pace.fmtClock(seconds); }
-  /* distances coming out of Pace.analyze() are already in the chosen unit */
-  function dist(value, u) { return value.toFixed(value < 1 ? 2 : 1) + ' ' + u; }
 
-  function show(text, state, sub) {
+  function show(text, state) {
     verdict.textContent = text;
     verdict.setAttribute('data-state', state);
-    detail.textContent = sub || '';
   }
 
   function render() {
     var d = num(distEl);
     var seconds = num(thEl) * 3600 + num(tmEl) * 60 + num(tsEl);
     var r = Pace.analyze(d, unit, seconds);
-    var u = r.unit;
 
-    if (r.status === 'incomplete') { show('', 'idle', ''); return; }
-
-    if (r.status === 'finished') {
-      var over = r.delta >= 0;
-      show(
-        r.pr ? 'PR!' : 'No PR',
-        r.pr ? 'on' : 'off',
-        clock(r.seconds) + ' for ' + dist(r.fullDistance, u) + ' — ' + clock(Math.abs(r.delta)) + (over ? ' over' : ' under') + ' the PB'
-      );
-      return;
-    }
-
-    if (r.status === 'impossible') {
-      show('PR out of reach', 'off', clock(r.seconds) + ' elapsed with ' + dist(r.remaining, u) + ' to go');
-      return;
-    }
-
-    if (Math.abs(r.delta) < 1) {
-      show('Dead level', 'off', 'projected ' + clock(r.projected) + ' — exactly PB pace');
-      return;
-    }
-
-    var ahead = r.delta < 0;
-    show(
-      r.status === 'on' ? 'On pace' : 'Off pace',
-      r.status === 'on' ? 'on' : 'off',
-      'projected ' + clock(r.projected) + ' — ' + clock(Math.abs(r.delta)) + (ahead ? ' under' : ' over') + ' the PB'
-    );
+    if (r.status === 'incomplete') { show('', 'idle'); return; }
+    if (r.status === 'finished') { show(r.pr ? 'PR!' : 'No PR', r.pr ? 'on' : 'off'); return; }
+    if (r.status === 'impossible') { show('PR out of reach', 'off'); return; }
+    if (Math.abs(r.delta) < 1) { show('Dead level', 'off'); return; }
+    show(r.onPace ? 'On pace' : 'Off pace', r.onPace ? 'on' : 'off');
   }
 
   function setUnit(next) {
@@ -197,7 +172,6 @@
   [thEl, tmEl, tsEl].forEach(function (el) { el.addEventListener('input', render); });
   unitBtn.addEventListener('click', function () { setUnit(unit === 'mi' ? 'km' : 'mi'); });
 
-  $('pb').textContent = clock(Pace.PB_SECONDS);
   render();
 }());
 </script>
