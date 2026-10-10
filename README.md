@@ -15,6 +15,7 @@ Live: https://drewroen.github.io/are-they-gonna-pr/
 - `cushion = requiredPace / pbPace − 1` — how much of PR pace the rest of the race can be run *slower* by (+ = ahead, − = behind). It is a ratio, so km and miles agree exactly.
 - the verdict comes straight off the cushion, in 3% bands: **Large PR** at +3% or better, **On pace to PR** from +3% to 0, **Slightly behind pace** from 0 to −3%, **Behind pace** worse than that. A cushion of exactly 0 is the tie — the rest has to be run at PR pace, which is not a PR — so it reads behind.
 - how hard the rest of the race is says more than how far the average so far projects: 10k in 40:00 projects 1:13 over the PB but only asks 0.2% under PR pace for the last 32.195km (*slightly behind*), while 40k in 2:41:20 projects only 2:37 over yet needs the last 2.195km at 2:50/km, 28% under PR pace (*behind*)
+- the line under the verdict is that pace made concrete — `paceNeededTextFor` — because it is the only number he can act on mid-race: "6:38.9/mi for the remaining 13.8mi". Once there is nothing left to pace (a finished race, or a PB already spent) it falls back to the projection gap, e.g. "0:54 under the PB"
 - `t ≥ PB` with distance left is reported as *PR out of reach* ("Not today") rather than as a pace — the PR is gone, not merely far off
 - rounded race distances are treated as the real thing: 26.2 mi / 42.2 km snap to the marathon, 13.1 mi / 21.1 km to the half (within 0.15%), so a PB-pace 26.2 is not read as 7s slow
 
@@ -29,7 +30,7 @@ Miles are converted with `KM_PER_MI = 1.609344`; the marathon is defined in km (
 - `.github/workflows/splits.yml` — the scheduled refresh during the race
 - `data/splits.json` — the current splits, committed by that workflow
 - `fonts/` — Instrument Sans woff2 subsets + `OFL.txt` (SIL Open Font License 1.1); self-hosted so the rendering is identical on every device
-- `tests/pace.test.js` — 32 tests, plain `assert`
+- `tests/pace.test.js` — 33 tests, plain `assert`
 - `tests/splits.test.js` — 15 tests against trimmed copies of the real markup
 - `README.md`
 

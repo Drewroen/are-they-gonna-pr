@@ -212,6 +212,28 @@
     return fmtClock(Math.abs(r.delta)) + (r.delta < 0 ? ' under the PB' : ' over the PB');
   }
 
+  /* Remaining distance for display: "13.8mi", "2.2km" — one decimal, never 0.0 */
+  function fmtRemaining(units, unit) {
+    var v = Math.round(units * 10) / 10;
+    if (v < 0.1) v = 0.1;
+    return v.toFixed(1) + unit;
+  }
+
+  /*
+   * The line under the verdict: the pace the rest of the race has to be run at to
+   * hit the PB, e.g. "6:38.9/mi for the remaining 13.8mi". Once there is no
+   * distance left to pace — a finished race, or a PB already spent — it falls
+   * back to the projection gap, which is the only number left to report.
+   */
+  function paceNeededTextFor(r, unit) {
+    var u = unit === 'mi' ? 'mi' : 'km';
+    if (!r || r.status === 'incomplete') return '';
+    if (r.remaining > 0 && isFinite(r.requiredPace) && r.requiredPace > 0) {
+      return fmtPace(r.requiredPace) + '/' + u + ' for the remaining ' + fmtRemaining(r.remaining, u);
+    }
+    return gapTextFor(r);
+  }
+
   return {
     KM_PER_MI: KM_PER_MI,
     MARATHON_KM: MARATHON_KM,
@@ -227,6 +249,7 @@
     analyze: analyze,
     verdictFor: verdictFor,
     gapTextFor: gapTextFor,
+    paceNeededTextFor: paceNeededTextFor,
     fmtClock: fmtClock,
     fmtPace: fmtPace,
     fmtGap: fmtGap

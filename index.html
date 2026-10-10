@@ -212,7 +212,7 @@
     if (!filled(distEl) || !filled(thEl) || !filled(tmEl) || !filled(tsEl)) { show('', 'idle', ''); return; }
     var r = Pace.analyze(num(distEl), unit, num(thEl) * 3600 + num(tmEl) * 60 + num(tsEl));
     var v = Pace.verdictFor(r);
-    show(v.text, v.tone, Pace.gapTextFor(r));
+    show(v.text, v.tone, Pace.paceNeededTextFor(r, unit));
   }
 
   function setUnit(next) {

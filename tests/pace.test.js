@@ -229,6 +229,28 @@ test('the estimate under the verdict', function () {
   assert.strictEqual(Pace.gapTextFor(Pace.analyze(21.0975, 'km', 5027)), 'right on the PB');
   assert.strictEqual(Pace.gapTextFor(Pace.analyze(0, 'km', 0)), '');
 });
+test('the line under the verdict is the pace the rest of the race needs', function () {
+  assert.strictEqual(Pace.paceNeededTextFor(Pace.analyze(20, 'mi', 7200), 'mi'),
+                     '7:38.9/mi for the remaining 6.2mi');
+  assert.strictEqual(Pace.paceNeededTextFor(Pace.analyze(40, 'km', 9680), 'km'),
+                     '2:50.4/km for the remaining 2.2km');
+  assert.strictEqual(Pace.paceNeededTextFor(Pace.analyze(21.0975, 'km', 5027), 'km'),
+                     '3:58.3/km for the remaining 21.1km');
+  assert.strictEqual(Pace.paceNeededTextFor(Pace.analyze(13.109375, 'mi', 5027), 'mi'),
+                     '6:23.5/mi for the remaining 13.1mi');
+  assert.strictEqual(Pace.paceNeededTextFor(Pace.analyze(0, 'km', 0), 'km'), '');
+  assert.strictEqual(Pace.paceNeededTextFor(null, 'mi'), '');
+  // nothing left to pace: the projection gap is the only number left to report
+  assert.strictEqual(Pace.paceNeededTextFor(Pace.analyze(42.195, 'km', 10000), 'km'), '0:54 under the PB');
+  assert.strictEqual(Pace.paceNeededTextFor(Pace.analyze(42.195, 'km', 10100), 'km'), '0:46 over the PB');
+  assert.strictEqual(Pace.paceNeededTextFor(Pace.analyze(40, 'km', 10060), 'km'), '0:06 past the PB');
+  // an unknown unit reads as km rather than printing nonsense
+  assert.strictEqual(Pace.paceNeededTextFor(Pace.analyze(40, 'km', 9680), undefined),
+                     '2:50.4/km for the remaining 2.2km');
+  // the same race in either unit asks for the same pace, just written differently
+  close(Pace.analyze(13.109375, 'mi', 5027).requiredPace,
+        Pace.analyze(21.0975, 'km', 5027).requiredPace * Pace.KM_PER_MI, 1e-9, 'pace across units');
+});
 test('bands as races really land', function () {
   assert.strictEqual(Pace.verdictFor(Pace.analyze(10, 'km', 2400)).text, 'Slightly behind pace'); // 10k in 40:00
   assert.strictEqual(Pace.verdictFor(Pace.analyze(21.0975, 'km', 5027)).text, 'Slightly behind pace'); // half at PR pace
