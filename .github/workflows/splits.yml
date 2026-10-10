@@ -43,7 +43,7 @@ jobs:
 
       - name: Fetch splits off the result page
         if: steps.day.outputs.skip != 'true'
-        run: node fetch-splits.js --idp 9TGG96382B7190 --year 2025 --event MAR_9TGG96381A5 --out data/splits.json --pretty
+        run: node fetch-splits.js --idp 9TGG96382C85BD --year 2025 --event MAR_9TGG96381A5 --out data/splits.json --pretty
 
       # one commit per actual change: the splits only move at checkpoints
       - name: Commit if the splits moved
