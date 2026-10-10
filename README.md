@@ -23,8 +23,10 @@ Miles are converted with `KM_PER_MI = 1.609344`; the marathon is defined in km (
 - `pace.js` — the pace math (browser global `Pace` / `require('pace.js')`)
 - `splits.js` — the results-page parser (browser global `Splits` / `require('splits.js')`)
 - `fetch-splits.js` — node CLI: name/bib → the live split JSON
+- `.github/workflows/splits.yml` — the scheduled refresh during the race
+- `data/splits.json` — the current splits, committed by that workflow
 - `fonts/` — Instrument Sans woff2 subsets + `OFL.txt` (SIL Open Font License 1.1); self-hosted so the rendering is identical on every device
-- `tests/pace.test.js` — 18 tests, plain `assert`
+- `tests/pace.test.js` — 29 tests, plain `assert`
 - `tests/splits.test.js` — 15 tests against trimmed copies of the real markup
 - `README.md`
 
@@ -46,6 +48,18 @@ node fetch-splits.js --name "Roen, Drew" --out data/splits.json
 `Splits.parseDetail(html)` is pure and dependency-free, so the page can use it too;
 the network helpers (`fetchSplits`, `findRunner`) are node-only. `Splits.paceInput(parsed.splits, 'mi')`
 returns `{ distance, unit, seconds }` — feed it straight to `Pace.analyze`.
+
+### On race day
+
+`.github/workflows/splits.yml` runs `fetch-splits.js` on a 5-minute cron through
+11 October (UTC), commits `data/splits.json` only when the splits actually move, and
+Pages republishes. The page fetches that file on load and once a minute, fills the
+sentence with the furthest split that has a time, and lets `pace.js` call it.
+
+Nothing about that is load-bearing: if the file is missing, unreadable, the wrong
+shape, or holds no timed split yet, the page does exactly what it always did and the
+numbers are typed by hand. Once a number is typed, the typed value wins for the rest
+of the visit (a reload goes back to the live data).
 
 Things the site does that you have to work around:
 

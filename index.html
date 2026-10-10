@@ -180,6 +180,7 @@
 </main>
 
 <script src="pace.js"></script>
+<script src="splits.js"></script>
 <script>
 (function () {
   'use strict';
@@ -228,7 +229,46 @@
   [thEl, tmEl, tsEl].forEach(function (el) { el.addEventListener('input', render); });
   unitBtn.addEventListener('click', function () { setUnit(unit === 'mi' ? 'km' : 'mi'); });
 
+  /* Live splits: data/splits.json is refreshed by a scheduled Action during
+     the race. When it parses and holds a timed split, it fills the sentence —
+     otherwise (missing, unreadable, wrong shape, no split yet) this page stays
+     exactly as it is and Drew types the numbers himself. */
+  var live = { key: null, dirty: false };
+
+  function applySplits(data) {
+    if (live.dirty || typeof Splits === 'undefined') return;
+    if (!data || !Array.isArray(data.splits)) return;
+    var input = Splits.paceInput(data.splits, unit);
+    if (!input || !isFinite(input.distance) || !isFinite(input.seconds) || input.seconds <= 0) return;
+    var key = input.label + '|' + input.distance + '|' + input.seconds;
+    if (key === live.key) return;          // same checkpoint as last time
+    live.key = key;
+    distEl.value = Pace.fmtDistance(input.distance, unit);
+    thEl.value = Math.floor(input.seconds / 3600);
+    tmEl.value = Math.floor((input.seconds % 3600) / 60);
+    tsEl.value = input.seconds % 60;
+    // the field only shows a rounded distance, so keep the exact km behind it
+    // (that is what the unit switch converts, so toggling never compounds)
+    km = unit === 'mi' ? input.distance * Pace.KM_PER_MI : input.distance;
+    render();
+  }
+
+  function pollSplits() {
+    if (live.dirty) return;
+    fetch('data/splits.json', { cache: 'no-store' })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(applySplits)
+      .catch(function () { /* nothing readable: the manual page stands */ });
+  }
+
+  // once he types, the typed numbers win for the rest of the visit
+  [distEl, thEl, tmEl, tsEl].forEach(function (el) {
+    el.addEventListener('input', function () { live.dirty = true; });
+  });
+
   render();
+  pollSplits();
+  setInterval(pollSplits, 60000);
 }());
 </script>
 </body>
