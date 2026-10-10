@@ -179,6 +179,7 @@ test('no result yet -> nulls everywhere, no crash', function () {
   assert.strictEqual(empty.splits.length, 2);
   assert.strictEqual(empty.splits.every(function (s) { return !s.hadTime; }), true);
   assert.strictEqual(empty.latest, null);
+  assert.strictEqual(empty.result.finishFrom, null);   // nothing timed to read it from
   assert.strictEqual(Splits.paceInput(empty.splits, 'km'), null);
 });
 
