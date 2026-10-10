@@ -149,6 +149,23 @@
     color: var(--muted);
     min-height: 1.5em;
   }
+
+  /* persistent link to the live timing page, parked in the corner */
+  .results {
+    position: fixed;
+    right: max(1rem, env(safe-area-inset-right));
+    bottom: max(1rem, env(safe-area-inset-bottom));
+    font-size: .875rem;
+    line-height: 1;
+  }
+  .results a {
+    color: var(--muted);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    padding-bottom: 1px;
+  }
+  .results a:hover,
+  .results a:focus-visible { color: var(--ink); border-bottom-color: currentColor; }
 </style>
 </head>
 <body>
@@ -178,6 +195,11 @@
   <p class="verdict" id="verdict" data-state="idle" role="status" aria-live="polite"></p>
   <p class="detail" id="detail"></p>
 </main>
+
+<footer class="results">
+  <a href="https://results.chicagomarathon.com/2026/?content=detail&amp;idp=2EFG96382E18FA&amp;event_main_group=2026&amp;lang=EN_CAP"
+     target="_blank" rel="noopener">Chicago results</a>
+</footer>
 
 <script src="pace.js"></script>
 <script src="splits.js"></script>
