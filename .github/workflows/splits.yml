@@ -1,0 +1,60 @@
+name: refresh splits
+
+# Every 5 minutes on 10 October (UTC), plus a manual trigger.
+# GitHub's floor for cron is 5 minutes, and scheduled runs can start late
+# under load — the manual trigger is there for that.
+on:
+  schedule:
+    - cron: '*/5 * * 10 10 *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-splits
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.schedule == '*/5 * * 10 10 *'
+    steps:
+      # the cron above repeats every year; this makes it a one-off
+      - name: Which day is it
+        id: day
+        run: |
+          today=$(date -u +%F)
+          echo "today=$today"
+          if [ "${{ github.event_name }}" = "schedule" ] && [ "$today" != "2026-10-10" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.day.outputs.skip != 'true'
+
+      - uses: actions/setup-node@v4
+        if: steps.day.outputs.skip != 'true'
+        with:
+          node-version: '20'
+
+      - name: Fetch splits off the result page
+        if: steps.day.outputs.skip != 'true'
+        run: node fetch-splits.js --idp 2EFG96382E18FA --year 2026 --out data/splits.json --pretty
+
+      # one commit per actual change: the splits only move at checkpoints
+      - name: Commit if the splits moved
+        if: steps.day.outputs.skip != 'true'
+        run: |
+          git add data/splits.json
+          if git diff --cached --quiet; then
+            echo "no change since the last run"
+            exit 0
+          fi
+          git -c user.name='github-actions[bot]' \
+              -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+              commit -m "splits: $(date -u +%FT%H:%MZ)"
+          git push
