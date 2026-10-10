@@ -1,6 +1,6 @@
 name: refresh splits
 
-# Every 5 minutes on 11 October (UTC) — race day — plus a manual trigger.
+# THROWAWAY BRANCH: same workflow, pointed at a 2025 runner with real splits.
 # GitHub's floor for cron is 5 minutes, and scheduled runs can start late
 # under load — the manual trigger is there for that.
 on:
@@ -43,7 +43,7 @@ jobs:
 
       - name: Fetch splits off the result page
         if: steps.day.outputs.skip != 'true'
-        run: node fetch-splits.js --idp 2EFG96382E18FA --year 2026 --out data/splits.json --pretty
+        run: node fetch-splits.js --idp 9TGG96382B7190 --year 2025 --event MAR_9TGG96381A5 --out data/splits.json --pretty
 
       # one commit per actual change: the splits only move at checkpoints
       - name: Commit if the splits moved
@@ -56,5 +56,5 @@ jobs:
           fi
           git -c user.name='github-actions[bot]' \
               -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
-              commit -m "splits: $(date -u +%FT%H:%MZ)"
+              commit -m "splits(old runner): $(date -u +%FT%H:%MZ)"
           git push
