@@ -149,8 +149,8 @@
     {
       "key": "35",
       "label": "35K *",
-      "distanceKm": null,
-      "distanceMi": null,
+      "distanceKm": 35,
+      "distanceMi": 21.747991728306687,
       "timeOfDay": "09:10:15AM",
       "elapsed": "01:40:14",
       "elapsedSeconds": 6014,
@@ -165,8 +165,8 @@
     {
       "key": "40",
       "label": "40K *",
-      "distanceKm": null,
-      "distanceMi": null,
+      "distanceKm": 40,
+      "distanceMi": 24.854847689493358,
       "timeOfDay": "09:24:45AM",
       "elapsed": "01:54:45",
       "elapsedSeconds": 6885,
