@@ -1,11 +1,11 @@
 name: refresh splits
 
-# Every 5 minutes on 10 October (UTC), plus a manual trigger.
+# Every 5 minutes on 11 October (UTC) — race day — plus a manual trigger.
 # GitHub's floor for cron is 5 minutes, and scheduled runs can start late
 # under load — the manual trigger is there for that.
 on:
   schedule:
-    - cron: '*/5 * * 10 10 *'
+    - cron: '*/5 * 11 10 *'
   workflow_dispatch:
 
 permissions:
@@ -21,7 +21,7 @@ jobs:
     timeout-minutes: 5
     if: >-
       github.event_name == 'workflow_dispatch' ||
-      github.event.schedule == '*/5 * * 10 10 *'
+      github.event.schedule == '*/5 * 11 10 *'
     steps:
       # the cron above repeats every year; this makes it a one-off
       - name: Which day is it
@@ -29,7 +29,7 @@ jobs:
         run: |
           today=$(date -u +%F)
           echo "today=$today"
-          if [ "${{ github.event_name }}" = "schedule" ] && [ "$today" != "2026-10-10" ]; then
+          if [ "${{ github.event_name }}" = "schedule" ] && [ "$today" != "2026-10-11" ]; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
           fi
 
