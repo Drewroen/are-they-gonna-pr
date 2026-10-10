@@ -12,6 +12,11 @@
   var PB = { h: 2, m: 47, s: 34 };
   var PB_SECONDS = PB.h * 3600 + PB.m * 60 + PB.s; // 10054
 
+  /* How close counts as close: the pace the rest of the race has to be run at,
+     compared with the even split that a PB run averages. Within 5% either way
+     and the asking price is basically PB pace, so a PB is still live. */
+  var CLOSE_MARGIN = 0.05;
+
   function pad(n) { return (n < 10 ? '0' : '') + n; }
 
   function distanceFor(unit) { return unit === 'mi' ? MARATHON_MI : MARATHON_KM; }
@@ -93,6 +98,11 @@
    *   projected  — finish time if the average pace so far holds
    *   delta      — projected - PB (negative = faster than PB); for 'finished' it is t - PB
    *   requiredPace — max average pace for the remaining distance that still beats PB
+   *   pbPace     — the even split a PB run averages (PB / marathon distance)
+   *   requiredPaceRatio — requiredPace / pbPace: 1 = the rest is exactly PB pace,
+   *                  <1 = the rest has to be faster than PB pace, >1 = slower
+   *   close      — behind on the projection but the rest asks for no more than
+   *                  CLOSE_MARGIN off PB pace
    */
   function analyze(distance, unit, seconds) {
     var u = unit === 'mi' ? 'mi' : 'km';
@@ -111,7 +121,10 @@
       avgPace: null,
       projected: null,
       delta: null,
-      requiredPace: null
+      requiredPace: null,
+      pbPace: null,
+      requiredPaceRatio: null,
+      close: false
     };
 
     if (!isFinite(d) || !isFinite(t) || d <= 0 || t <= 0) {
@@ -121,6 +134,7 @@
 
     var remaining = D - d;
     base.avgPace = t / d;
+    base.pbPace = PB_SECONDS / D;
 
     if (d >= D) {
       base.status = 'finished';
@@ -134,6 +148,7 @@
     base.projected = (t / d) * D;
     base.delta = base.projected - PB_SECONDS;
     base.requiredPace = (PB_SECONDS - t) / remaining;
+    base.requiredPaceRatio = base.requiredPace / base.pbPace;
 
     if (t >= PB_SECONDS) {
       // Every second of the PB has been spent with distance still to run.
@@ -144,11 +159,17 @@
 
     base.onPace = base.projected < PB_SECONDS;
     base.status = base.onPace ? 'on' : 'off';
+    // Behind, but the rest of the race asks for no more than CLOSE_MARGIN off
+    // the even split a PB averages — the PB is still within reach.
+    base.close = !base.onPace && Math.abs(base.requiredPaceRatio - 1) <= CLOSE_MARGIN;
     return base;
   }
 
   /*
-   * The verdict in words, tiered by how far the projection is from the PB:
+   * The verdict in words. First the question the race turns on: is the pace the
+   * rest of the race needs still within CLOSE_MARGIN of PB pace? If so it is
+   * "Close" however far out the projection currently reads. Otherwise the
+   * projection is tiered by how far it sits from the PB:
    *   10%+ behind -> "Not today"            5-10% behind -> "Falling off pace"
    *   0-5% behind -> "Slightly behind pace" 0-5% ahead   -> "On pace for a small PR"
    *   5%+ ahead   -> "On pace for a big PR"
@@ -157,6 +178,7 @@
     if (!r || r.status === 'incomplete') return { text: '', tone: 'idle' };
     if (r.status === 'finished') return r.pr ? { text: 'PR!', tone: 'on' } : { text: 'No PR', tone: 'off' };
     if (r.status === 'impossible') return { text: 'Not today', tone: 'off' };
+    if (r.close) return { text: 'Close', tone: 'off' };
 
     var pct = (r.projected - r.pbSeconds) / r.pbSeconds * 100;
     if (pct >= 10) return { text: 'Not today', tone: 'off' };
@@ -181,6 +203,7 @@
     MARATHON_MI: MARATHON_MI,
     PB: PB,
     PB_SECONDS: PB_SECONDS,
+    CLOSE_MARGIN: CLOSE_MARGIN,
     distanceFor: distanceFor,
     snapDistance: snapDistance,
     convertDistance: convertDistance,

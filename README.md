@@ -12,6 +12,8 @@ Live: https://drewroen.github.io/are-they-gonna-pr/
 - `projected = avgPace × marathon` — finish time if the average holds
 - `onPace = projected < PB` — a tie is not a PR
 - `requiredPace = (PB − t) / (marathon − d)` — the fastest average that still wins, i.e. the most you can afford to slow down (or the pace you must hold) for the rest
+- `pbPace = PB / marathon` — the even split a PB run averages (3:58.3/km, 6:23.5/mi)
+- `close = |requiredPace / pbPace − 1| ≤ 5%` — behind on the projection, but the rest of the race asks for no more than 5% off PB pace. That is the verdict *Close*, checked ahead of the projection tiers below, because how hard the rest of the race is says more about a PB than how far off the current average projects. Early on it is forgiving (5k in 24:00 projects +21% but still reads *Close*); late on it is not (40k in 2:41:20 projects only 2:37 over, yet the last 2.195km would need 2:50/km, so it stays *Slightly behind pace*)
 - `t ≥ PB` with distance left is reported as *PR out of reach*, not as a pace
 - rounded race distances are treated as the real thing: 26.2 mi / 42.2 km snap to the marathon, 13.1 mi / 21.1 km to the half (within 0.15%), so a PB-pace 26.2 is not read as 7s slow
 
@@ -26,7 +28,7 @@ Miles are converted with `KM_PER_MI = 1.609344`; the marathon is defined in km (
 - `.github/workflows/splits.yml` — the scheduled refresh during the race
 - `data/splits.json` — the current splits, committed by that workflow
 - `fonts/` — Instrument Sans woff2 subsets + `OFL.txt` (SIL Open Font License 1.1); self-hosted so the rendering is identical on every device
-- `tests/pace.test.js` — 29 tests, plain `assert`
+- `tests/pace.test.js` — 31 tests, plain `assert`
 - `tests/splits.test.js` — 15 tests against trimmed copies of the real markup
 - `README.md`
 
