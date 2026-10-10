@@ -23,7 +23,7 @@
     "placeOverall": null,
     "finishTime": null,
     "finishSeconds": null,
-    "finishFrom": "split"
+    "finishFrom": null
   },
   "status": {
     "raceStatus": null,
