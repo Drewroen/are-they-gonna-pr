@@ -61,7 +61,7 @@ test('half marathon in 1:23:47 is a tie, not a PR', function () {
   assert.strictEqual(r.status, 'off');
   close(r.requiredPace, 238.278, 0.01, 'required pace equals PB pace');
   close(r.requiredPaceRatio, 1, 1e-9, 'the rest is PB pace, exactly');
-  assert.strictEqual(r.close, true, 'a PB-pace tie is close');
+  assert.strictEqual(r.band, 'slightly-behind', 'a PR-pace tie is not a PR');
 });
 
 test('half marathon in 1:23:20 is on pace', function () {
@@ -71,7 +71,7 @@ test('half marathon in 1:23:20 is on pace', function () {
   close(r.delta, -54, 0.5, 'delta');
   close(r.avgPace, 237.0, 0.1, 'avg pace');
   assert.ok(r.requiredPace > r.avgPace, 'can afford to slow down');
-  assert.strictEqual(r.close, false, 'ahead is not the close case');
+  assert.strictEqual(r.band, 'on-pace', '27s up is on pace, not yet a large PR');
 });
 
 // --- off pace --------------------------------------------------------------
@@ -84,8 +84,9 @@ test('10k in 40:00 -> off pace, 237.7/km needed for the last 32.195km', function
   close(r.remaining, 32.195, 1e-9, 'remaining');
   close(r.requiredPace, 237.7388, 0.01, 'required pace');
   assert.ok(r.requiredPace < r.avgPace, 'must speed up');
-  close(r.requiredPaceRatio, 0.9978, 0.0001, 'the rest is a hair under PB pace');
-  assert.strictEqual(r.close, true, '10k in 40:00 leaves the PB within reach');
+  close(r.requiredPaceRatio, 0.9978, 0.0001, 'the rest is a hair under PR pace');
+  close(r.cushion, -0.0022, 0.0002, 'cushion');
+  assert.strictEqual(r.band, 'slightly-behind', '10k in 40:00 is 0.2% under PR pace for the rest');
 });
 
 test('5k in 24:00 -> off pace', function () {
@@ -93,7 +94,8 @@ test('5k in 24:00 -> off pace', function () {
   assert.strictEqual(r.status, 'off');
   close(r.avgPace, 288, 1e-9, 'avg pace');
   close(r.projected, 12152.16, 0.01, 'projected');
-  assert.strictEqual(r.close, true, 'early and 48s/km down, the PB is still live');
+  close(r.cushion, -0.0281, 0.0001, '2.8% under PR pace for the rest, just inside the band');
+  assert.strictEqual(r.band, 'slightly-behind');
 });
 
 // --- miles -----------------------------------------------------------------
@@ -118,7 +120,7 @@ test('past PB time with distance left -> impossible', function () {
   assert.strictEqual(r.status, 'impossible');
   assert.strictEqual(r.overSeconds, 6);
   assert.ok(r.requiredPace < 0, 'required pace is negative');
-  assert.strictEqual(r.close, false, 'nothing left to be close with');
+  assert.strictEqual(r.band, null, 'nothing left to measure a cushion with');
 });
 
 test('exactly at PB time with distance left -> impossible', function () {
@@ -149,69 +151,74 @@ test('Splits: 30km in 1:59:00 projects a 2:47:21 finish (13s under PB)', functio
   close(r.requiredPace, (10054 - 7140) / 12.195, 0.01, 'required pace');
 });
 
-// --- verdict tiers ---------------------------------------------------------
-// Synthetic results with close:false, so these pin the fallback tier table
-// below the close rule.
-function tierFor(pct) {
-  return Pace.verdictFor({
-    status: pct > 0 ? 'off' : 'on',
-    close: false,
-    pbSeconds: Pace.PB_SECONDS,
-    projected: Pace.PB_SECONDS * (1 + pct / 100),
-    delta: Pace.PB_SECONDS * pct / 100
-  }).text;
+// --- the cushion bands ------------------------------------------------------
+// The verdict comes straight off the cushion: requiredPace / pbPace - 1, the
+// fraction of PR pace the rest of the race can be run slower by.
+function bandFor(cushion) {
+  return Pace.verdictFor({ status: cushion > 0 ? 'on' : 'off', cushion: cushion }).text;
 }
-test('verdict tiers around the PB', function () {
-  assert.strictEqual(tierFor(25), 'Not today');
-  assert.strictEqual(tierFor(10), 'Not today');
-  assert.strictEqual(tierFor(9.9), 'Falling off pace');
-  assert.strictEqual(tierFor(5), 'Falling off pace');
-  assert.strictEqual(tierFor(4.9), 'Slightly behind pace');
-  assert.strictEqual(tierFor(0.2), 'Slightly behind pace');
-  assert.strictEqual(tierFor(-0.2), 'On pace for a small PR');
-  assert.strictEqual(tierFor(-4.9), 'On pace for a small PR');
-  assert.strictEqual(tierFor(-5), 'On pace for a big PR');
-  assert.strictEqual(tierFor(-9.9), 'On pace for a big PR');
-  assert.strictEqual(tierFor(-30), 'On pace for a big PR');
+test('the four bands land on the 3% cushion', function () {
+  assert.strictEqual(bandFor(0.10), 'Large PR');
+  assert.strictEqual(bandFor(0.03), 'Large PR');
+  assert.strictEqual(bandFor(0.0299), 'On pace to PR');
+  assert.strictEqual(bandFor(0.0001), 'On pace to PR');
+  assert.strictEqual(bandFor(0), 'Slightly behind pace');      // a tie is not a PR
+  assert.strictEqual(bandFor(-0.0299), 'Slightly behind pace');
+  assert.strictEqual(bandFor(-0.03), 'Slightly behind pace');
+  assert.strictEqual(bandFor(-0.0301), 'Behind pace');
+  assert.strictEqual(bandFor(-0.5), 'Behind pace');
+  // no cushion at all -> no verdict, rather than a wrong one
+  assert.strictEqual(Pace.verdictFor({ status: 'on', cushion: null }).text, '');
+  assert.strictEqual(Pace.cushionBand(NaN), null);
+  assert.strictEqual(Pace.cushionBand(undefined), null);
 });
-test('verdict tone follows the tier', function () {
-  assert.strictEqual(Pace.verdictFor({ status: 'on', projected: 9000, pbSeconds: 10054, delta: -1054 }).tone, 'on');
-  assert.strictEqual(Pace.verdictFor({ status: 'off', projected: 11000, pbSeconds: 10054, delta: 946 }).tone, 'off');
-  assert.strictEqual(Pace.verdictFor({ status: 'off', close: true, projected: 11000, pbSeconds: 10054, delta: 946 }).tone, 'off');
+test('verdict tone follows the band', function () {
+  assert.strictEqual(Pace.verdictFor({ status: 'on', cushion: 0.05 }).tone, 'on');
+  assert.strictEqual(Pace.verdictFor({ status: 'on', cushion: 0.01 }).tone, 'on');
+  assert.strictEqual(Pace.verdictFor({ status: 'off', cushion: -0.01 }).tone, 'off');
+  assert.strictEqual(Pace.verdictFor({ status: 'off', cushion: -0.9 }).tone, 'off');
 });
 test('verdict for the special statuses', function () {
   assert.strictEqual(Pace.verdictFor({ status: 'incomplete' }).text, '');
   assert.strictEqual(Pace.verdictFor({ status: 'incomplete' }).tone, 'idle');
-  assert.strictEqual(Pace.verdictFor({ status: 'impossible', projected: 99999, pbSeconds: 10054, delta: 90000 }).text, 'Not today');
+  assert.strictEqual(Pace.verdictFor({ status: 'impossible', cushion: -9 }).text, 'Not today');
   assert.strictEqual(Pace.verdictFor({ status: 'finished', pr: true }).text, 'PR!');
   assert.strictEqual(Pace.verdictFor({ status: 'finished', pr: false }).text, 'No PR');
-  // dead on the PB is not a PR, so without the close flag it sits in the behind bucket
-  assert.strictEqual(Pace.verdictFor({ status: 'on', close: false, projected: 10054, pbSeconds: 10054, delta: 0 }).text, 'Slightly behind pace');
 });
 
-// --- close: the rest of the race is about PB pace --------------------------
-test('the close band is the required pace within 5% of PB pace', function () {
-  var half = Pace.analyze(21.0975, 'km', 5278);       // half run 4:11 over PB pace
-  close(half.requiredPaceRatio, 0.9501, 0.0001, 'ratio just inside the band');
-  assert.strictEqual(half.close, true);
-  close(half.pbPace, Pace.PB_SECONDS / Pace.MARATHON_KM, 1e-9, 'PB pace is the even split');
+// --- what the rest of the race asks for ------------------------------------
+test('the band is the pace the rest of the race needs, against PR pace', function () {
+  var tie = Pace.analyze(21.0975, 'km', 5027);       // half exactly at PR pace
+  close(tie.requiredPaceRatio, 1, 1e-9, 'the rest is PR pace');
+  close(tie.cushion, 0, 1e-9, 'no cushion');
+  close(tie.pbPace, Pace.PB_SECONDS / Pace.MARATHON_KM, 1e-9, 'PR pace is the even split');
+  assert.strictEqual(tie.band, 'slightly-behind');
+  assert.strictEqual(Pace.verdictFor(tie).text, 'Slightly behind pace');
 
-  var over = Pace.analyze(21.0975, 'km', 5280);      // 2s slower, just outside
-  close(over.requiredPaceRatio, 0.9497, 0.0001, 'ratio just outside the band');
-  assert.strictEqual(over.close, false, 'more than 5% is no longer close');
-  assert.strictEqual(Pace.verdictFor(over).text, 'Falling off pace', 'falls back to the tier');
+  var ahead = Pace.analyze(21.0975, 'km', 5000);     // 27s up on PR pace
+  assert.strictEqual(ahead.band, 'on-pace');
+  assert.strictEqual(Pace.verdictFor(ahead).text, 'On pace to PR');
+
+  var big = Pace.analyze(21.0975, 'km', 4870);       // 2:37 up on PR pace
+  assert.ok(big.cushion > Pace.PACE_BAND, 'more than 3% of PR pace in hand');
+  assert.strictEqual(Pace.verdictFor(big).text, 'Large PR');
 });
-test('close is about the rest of the race, not the projection', function () {
-  // 10k in 40:00 projects 1:13 over the PB but still asks only PB pace for the
-  // last 32.195km, so it is close rather than "slightly behind".
+test('the cushion is unit-free', function () {
+  assert.strictEqual(Pace.analyze(21.0975, 'km', 5278).cushion.toFixed(9),
+                     Pace.analyze(13.109375, 'mi', 5278).cushion.toFixed(9));
+});
+test('the band is about the rest of the race, not the projection', function () {
+  // 10k in 40:00 projects 1:13 over the PR, but the last 32.195km only needs to be
+  // 0.2% under PR pace, so it is merely slightly behind.
   var early = Pace.analyze(10, 'km', 2400);
-  assert.strictEqual(Pace.verdictFor(early).text, 'Close');
-  // 40k in 2:41:20 projects only 2:37 over the PB, but the last 2.195km would
-  // have to be run at 2:50/km — 28% faster than PB pace — so it is not close.
+  close(early.cushion, -0.0022, 0.0002, 'cushion');
+  assert.strictEqual(Pace.verdictFor(early).text, 'Slightly behind pace');
+  // 40k in 2:41:20 projects only 2:37 over the PR, but the last 2.195km would have
+  // to be run at 2:50/km — 28% under PR pace — so that is behind pace.
   var late = Pace.analyze(40, 'km', 9680);
-  close(late.requiredPaceRatio, 0.7151, 0.0001, 'ratio well outside the band');
-  assert.strictEqual(late.close, false);
-  assert.strictEqual(Pace.verdictFor(late).text, 'Slightly behind pace');
+  close(late.cushion, -0.2849, 0.0001, 'cushion');
+  close(late.requiredPaceRatio, 0.7151, 0.0001, 'ratio');
+  assert.strictEqual(Pace.verdictFor(late).text, 'Behind pace');
 });
 test('the estimate under the verdict', function () {
   assert.strictEqual(Pace.gapTextFor(Pace.analyze(20, 'mi', 7200)), '10:15 under the PB');
@@ -222,13 +229,13 @@ test('the estimate under the verdict', function () {
   assert.strictEqual(Pace.gapTextFor(Pace.analyze(21.0975, 'km', 5027)), 'right on the PB');
   assert.strictEqual(Pace.gapTextFor(Pace.analyze(0, 'km', 0)), '');
 });
-test('tiers as races really land', function () {
-  assert.strictEqual(Pace.verdictFor(Pace.analyze(10, 'km', 2400)).text, 'Close');             // 10k in 40:00
-  assert.strictEqual(Pace.verdictFor(Pace.analyze(21.0975, 'km', 5027)).text, 'Close');        // half at PB pace
-  assert.strictEqual(Pace.verdictFor(Pace.analyze(20, 'mi', 7200)).text, 'On pace for a big PR');// 20mi in 2:00
-  assert.strictEqual(Pace.verdictFor(Pace.analyze(5, 'km', 1440)).text, 'Close');               // 5k in 24:00
-  assert.strictEqual(Pace.verdictFor(Pace.analyze(40, 'km', 9680)).text, 'Slightly behind pace');// 40k in 2:41:20
-  assert.strictEqual(Pace.verdictFor(Pace.analyze(40, 'km', 10060)).text, 'Not today');          // past PB time
+test('bands as races really land', function () {
+  assert.strictEqual(Pace.verdictFor(Pace.analyze(10, 'km', 2400)).text, 'Slightly behind pace'); // 10k in 40:00
+  assert.strictEqual(Pace.verdictFor(Pace.analyze(21.0975, 'km', 5027)).text, 'Slightly behind pace'); // half at PR pace
+  assert.strictEqual(Pace.verdictFor(Pace.analyze(20, 'mi', 7200)).text, 'Large PR');            // 20mi in 2:00
+  assert.strictEqual(Pace.verdictFor(Pace.analyze(5, 'km', 1440)).text, 'Slightly behind pace'); // 5k in 24:00
+  assert.strictEqual(Pace.verdictFor(Pace.analyze(40, 'km', 9680)).text, 'Behind pace');        // 40k in 2:41:20
+  assert.strictEqual(Pace.verdictFor(Pace.analyze(40, 'km', 10060)).text, 'Not today');          // past PR time
 });
 
 // --- rounded race distances -------------------------------------------------

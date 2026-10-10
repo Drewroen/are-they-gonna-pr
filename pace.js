@@ -12,10 +12,16 @@
   var PB = { h: 2, m: 47, s: 34 };
   var PB_SECONDS = PB.h * 3600 + PB.m * 60 + PB.s; // 10054
 
-  /* How close counts as close: the pace the rest of the race has to be run at,
-     compared with the even split that a PB run averages. Within 5% either way
-     and the asking price is basically PB pace, so a PB is still live. */
-  var CLOSE_MARGIN = 0.05;
+  /* The band that decides the verdict, measured on the pace the rest of the race
+     has to be run at, compared with the even split a PR averages:
+       cushion = requiredPace / pbPace - 1
+       cushion >=  +3%  -> "Large PR"            (room to give away)
+       0 .. +3%         -> "On pace to PR"       (the rest is about PR pace)
+       0 .. -3%         -> "Slightly behind pace"
+       worse than -3%   -> "Behind pace"         (the rest must be run >3% quick)
+     How hard the rest of the race is says more about a PR than how far the
+     average so far projects, and it is unit-free: the same numbers in km or mi. */
+  var PACE_BAND = 0.03;
 
   function pad(n) { return (n < 10 ? '0' : '') + n; }
 
@@ -101,8 +107,10 @@
    *   pbPace     — the even split a PB run averages (PB / marathon distance)
    *   requiredPaceRatio — requiredPace / pbPace: 1 = the rest is exactly PB pace,
    *                  <1 = the rest has to be faster than PB pace, >1 = slower
-   *   close      — behind on the projection but the rest asks for no more than
-   *                  CLOSE_MARGIN off PB pace
+   *   cushion    — requiredPaceRatio - 1: the fraction of PB pace the rest of the
+   *                  race can be run slower by (+ = ahead, - = behind)
+   *   band       — 'large-pr' | 'on-pace' | 'slightly-behind' | 'behind' | null,
+   *                  the cushion against PACE_BAND; null when there is no verdict
    */
   function analyze(distance, unit, seconds) {
     var u = unit === 'mi' ? 'mi' : 'km';
@@ -124,7 +132,8 @@
       requiredPace: null,
       pbPace: null,
       requiredPaceRatio: null,
-      close: false
+      cushion: null,
+      band: null
     };
 
     if (!isFinite(d) || !isFinite(t) || d <= 0 || t <= 0) {
@@ -159,34 +168,40 @@
 
     base.onPace = base.projected < PB_SECONDS;
     base.status = base.onPace ? 'on' : 'off';
-    // Behind, but the rest of the race asks for no more than CLOSE_MARGIN off
-    // the even split a PB averages — the PB is still within reach.
-    base.close = !base.onPace && Math.abs(base.requiredPaceRatio - 1) <= CLOSE_MARGIN;
+    base.cushion = base.requiredPaceRatio - 1;
+    base.band = cushionBand(base.cushion);
     return base;
   }
 
+  /* The cushion -> one of the four states. A cushion of exactly 0 is the tie:
+     the rest has to be run at PR pace, which is not a PR, so it reads behind. */
+  function cushionBand(cushion) {
+    if (typeof cushion !== 'number' || !isFinite(cushion)) return null;
+    if (cushion >= PACE_BAND) return 'large-pr';
+    if (cushion > 0) return 'on-pace';
+    if (cushion >= -PACE_BAND) return 'slightly-behind';
+    return 'behind';
+  }
+
   /*
-   * The verdict in words. First the question the race turns on: is the pace the
-   * rest of the race needs still within CLOSE_MARGIN of PB pace? If so it is
-   * "Close" however far out the projection currently reads. Otherwise the
-   * projection is tiered by how far it sits from the PB:
-   *   10%+ behind -> "Not today"            5-10% behind -> "Falling off pace"
-   *   0-5% behind -> "Slightly behind pace" 0-5% ahead   -> "On pace for a small PR"
-   *   5%+ ahead   -> "On pace for a big PR"
+   * The verdict in words, straight off the cushion — how much of PB pace the rest
+   * of the race can be run slower by (negative = the rest must be quicker):
+   *   >= +3%  "Large PR"     0 .. +3%  "On pace to PR"
+   *   0 .. -3%  "Slightly behind pace"   worse  "Behind pace"
+   * Special states keep their own wording: nothing typed, a finished race (PR! /
+   * No PR), and a PB already spent with distance left ("Not today").
    */
   function verdictFor(r) {
     if (!r || r.status === 'incomplete') return { text: '', tone: 'idle' };
     if (r.status === 'finished') return r.pr ? { text: 'PR!', tone: 'on' } : { text: 'No PR', tone: 'off' };
     if (r.status === 'impossible') return { text: 'Not today', tone: 'off' };
-    if (r.close) return { text: 'Close', tone: 'off' };
 
-    var pct = (r.projected - r.pbSeconds) / r.pbSeconds * 100;
-    if (pct >= 10) return { text: 'Not today', tone: 'off' };
-    if (pct >= 5) return { text: 'Falling off pace', tone: 'off' };
-    // a projection dead on the PB counts as behind: a PR has to be under it
-    if (pct >= 0) return { text: 'Slightly behind pace', tone: 'off' };
-    if (pct > -5) return { text: 'On pace for a small PR', tone: 'on' };
-    return { text: 'On pace for a big PR', tone: 'on' };
+    var band = r.band || cushionBand(r.cushion);
+    if (band === 'large-pr') return { text: 'Large PR', tone: 'on' };
+    if (band === 'on-pace') return { text: 'On pace to PR', tone: 'on' };
+    if (band === 'slightly-behind') return { text: 'Slightly behind pace', tone: 'off' };
+    if (band === 'behind') return { text: 'Behind pace', tone: 'off' };
+    return { text: '', tone: 'idle' };
   }
 
   /* the estimate under the verdict: how far ahead of or behind the PB it lands */
@@ -203,7 +218,8 @@
     MARATHON_MI: MARATHON_MI,
     PB: PB,
     PB_SECONDS: PB_SECONDS,
-    CLOSE_MARGIN: CLOSE_MARGIN,
+    PACE_BAND: PACE_BAND,
+    cushionBand: cushionBand,
     distanceFor: distanceFor,
     snapDistance: snapDistance,
     convertDistance: convertDistance,
