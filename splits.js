@@ -69,9 +69,11 @@
   // ------------------------------------------------------------- splits ----
 
   /* Distance a split label sits at. Labels are the source of truth: "05K",
-     "HALF", "Mile 25.2", "Finish". Unknown label -> null (time is still kept). */
+     "HALF", "Mile 25.2", "Finish". The archive template appends a bold "*" to
+     unofficial/estimated splits ("35K *"), so decoration is stripped first.
+     Unknown label -> null (the time is still kept). */
   function distanceKmFor(label, key) {
-    var t = String(label || '').trim();
+    var t = String(label || '').replace(/[^0-9A-Za-z. ]/g, '').replace(/\s+/g, ' ').trim();
     var m = /^(\d+(?:\.\d+)?)\s*K$/i.exec(t);
     if (m) return parseFloat(m[1]);
     m = /^Mile\s+(\d+(?:\.\d+)?)$/i.exec(t);
