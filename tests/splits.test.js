@@ -90,6 +90,11 @@ test('label -> distance', function () {
   assert.strictEqual(Splits.distanceKmFor('Finish'), 42.195);
   assert.strictEqual(Math.abs(Splits.distanceKmFor('Mile 20') - 32.18688) < 1e-5, true);
   assert.strictEqual(Math.abs(Splits.distanceKmFor('Mile 25.2') - 40.5554) < 1e-3, true);
+  // the archive template marks unofficial splits with a bold asterisk
+  assert.strictEqual(Splits.distanceKmFor('35K *'), 35);
+  assert.strictEqual(Splits.distanceKmFor('40K *'), 40);
+  assert.strictEqual(Splits.distanceKmFor('Finish *'), 42.195);
+  assert.strictEqual(Math.abs(Splits.distanceKmFor('Mile 25.2 *') - 40.5554) < 1e-3, true);
   assert.strictEqual(Splits.distanceKmFor('Weird'), null);
   assert.strictEqual(Splits.distanceKmFor('', '52'), 21.0975);   // key fallback
   assert.strictEqual(Splits.distanceKmFor('', 'finish_netto'), 42.195);
