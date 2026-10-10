@@ -274,7 +274,7 @@
         placeOverall: v('place_nosex'),
         finishTime: finishTime,
         finishSeconds: clockToSeconds(finishTime),
-        finishFrom: finishField ? 'result' : (finishSplit ? 'split' : null)
+        finishFrom: finishField ? 'result' : (finishSplit && finishSplit.elapsedSeconds !== null ? 'split' : null)
       },
       status: {
         raceStatus: v('__race_status'),
