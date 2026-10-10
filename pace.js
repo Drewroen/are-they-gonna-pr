@@ -212,24 +212,24 @@
     return fmtClock(Math.abs(r.delta)) + (r.delta < 0 ? ' under the PB' : ' over the PB');
   }
 
-  /* Remaining distance for display: "13.8mi", "2.2km" — one decimal, never 0.0 */
-  function fmtRemaining(units, unit) {
-    var v = Math.round(units * 10) / 10;
-    if (v < 0.1) v = 0.1;
-    return v.toFixed(1) + unit;
+  /* pace floored to the whole second: "6:35". Floored, not rounded, so a target
+     never reads faster than it actually is. */
+  function fmtPaceWhole(secondsPerUnit) {
+    var s = Math.floor(Math.abs(secondsPerUnit));
+    var m = Math.floor(s / 60);
+    return (secondsPerUnit < 0 ? '-' : '') + m + ':' + pad(s % 60);
   }
 
   /*
    * The line under the verdict: the pace the rest of the race has to be run at to
-   * hit the PB, e.g. "6:38.9/mi for the remaining 13.8mi". Once there is no
-   * distance left to pace — a finished race, or a PB already spent — it falls
-   * back to the projection gap, which is the only number left to report.
+   * hit the PB, floored to the second. Once there is no distance left to pace — a
+   * finished race, or a PB already spent — it falls back to the projection gap,
+   * which is the only number left to report.
    */
-  function paceNeededTextFor(r, unit) {
-    var u = unit === 'mi' ? 'mi' : 'km';
+  function paceNeededTextFor(r) {
     if (!r || r.status === 'incomplete') return '';
     if (r.remaining > 0 && isFinite(r.requiredPace) && r.requiredPace > 0) {
-      return fmtPace(r.requiredPace) + '/' + u + ' for the remaining ' + fmtRemaining(r.remaining, u);
+      return 'He needs to run ' + fmtPaceWhole(r.requiredPace) + ' pace for the rest of the race';
     }
     return gapTextFor(r);
   }
