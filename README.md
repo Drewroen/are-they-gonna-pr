@@ -2,7 +2,7 @@
 
 One page, two inputs: *He hit 13.1 miles ⇄ in 1 hours, 23 minutes and 47 seconds.* Type where Drew is and the clock; it says whether he is on pace to beat his **2:47:34** marathon PB (42.195 km / 26.21875 mi — an even split of 3:58.3/km or 6:23.5/mi).
 
-Live: https://drewroen.github.io/are-they-gonna-pr/
+Live: https://isdrewgonnapr.today/
 
 ## How it works
 
