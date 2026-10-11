@@ -26,12 +26,12 @@
     "finishFrom": null
   },
   "status": {
-    "raceStatus": "Not Started",
+    "raceStatus": "Started",
     "lastSplit": null,
     "predictedFinish": null,
     "predictedFinishSeconds": null,
     "predictedFinishDay": null,
-    "startTime": null
+    "startTime": "07:35:24"
   },
   "splits": [
     {
@@ -333,9 +333,13 @@
       "name": "Short",
       "value": "DR"
     },
+    "starttime_net": {
+      "name": "Start Time",
+      "value": "07:35:24"
+    },
     "__race_status": {
       "name": "Race Status",
-      "value": "Not Started"
+      "value": "Started"
     }
   }
 }
