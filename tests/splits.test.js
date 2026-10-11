@@ -257,5 +257,48 @@ test('the Result box wins when it does carry a finish time', function () {
   assert.strictEqual(both.result.finishFrom, 'result');
 });
 
+test('a live page: splits past the official last split are projections', function () {
+  var live = Splits.parseDetail([
+    box('detail-box-state', 'Race Status', [
+      field('f-__race_status', 'Race Status', 'Started'),
+      field('f-__last_split_name', 'Last Split', '05K'),
+      field('f-__estimated_finish', 'Pred. Finish', '02:51:14')
+    ]),
+    '<div class="detail-box  box-splits      " id="detail-box-splits" role=""><h3>Splits</h3><div class="table-responsive"><table><tbody>' +
+    row('05', '05K', { time_day: '07:55:42AM', time: '00:20:18', diff: '20:18', min_km: '04:04', kmh: '14.79', min_mile: '06:33', miles_h: '9.19' }) +
+    row('10', '10K *', { time_day: '08:15:59AM', time: '00:40:35', diff: '20:17', min_km: '04:04', kmh: '14.79', min_mile: '06:33', miles_h: '9.19' }) +
+    row('finish_netto', 'Finish *', { time_day: '10:26:37AM', time: '02:51:14', diff: '06:40', min_km: '04:04', kmh: '14.79', min_mile: '06:33', miles_h: '9.19' }) +
+    '</tbody></table></div></div>'
+  ].join('\n'));
+  // the split he has run
+  assert.strictEqual(live.splits[0].hadTime, true);
+  assert.strictEqual(live.splits[0].projected, undefined);
+  assert.strictEqual(live.latest.label, '05K');
+  assert.strictEqual(live.latest.elapsedSeconds, 1218);
+  // the ones the page projects for the mats ahead
+  assert.strictEqual(live.splits[1].projected, true);
+  assert.strictEqual(live.splits[1].hadTime, false);
+  assert.strictEqual(live.splits[1].elapsed, '00:40:35');   // the page's guess is kept, not thrown away
+  assert.strictEqual(live.splits[2].projected, true);
+  assert.strictEqual(live.result.finishTime, null);         // ...but it is not a finish
+  assert.strictEqual(live.result.finishFrom, null);
+  assert.strictEqual(Splits.paceInput(live.splits, 'km').distance, 5);
+  assert.strictEqual(Splits.paceInput(live.splits, 'km').seconds, 1218);
+});
+
+test('a finished page keeps every split — nothing is past the last one', function () {
+  var done = Splits.parseDetail([
+    box('detail-box-state', 'Race Status', [field('f-__last_split_name', 'Last Split', 'Finish')]),
+    '<div class="detail-box  box-splits      " id="detail-box-splits" role=""><h3>Splits</h3><div class="table-responsive"><table><tbody>' +
+    row('05', '05K', { time_day: '08:14:30AM', time: '00:22:53', diff: '22:53', min_km: '04:35', min_mile: '07:22' }) +
+    row('35', '35K *', { time_day: '10:47:03AM', time: '02:55:16', diff: '25:16', min_km: '05:03', min_mile: '08:08' }) +
+    row('finish_netto', 'Finish *', { time_day: '11:17:33AM', time: '03:25:55', diff: '11:09', min_km: '05:05', min_mile: '08:11' }) +
+    '</tbody></table></div></div>'
+  ].join('\n'));
+  assert.strictEqual(done.splits.every(function (s) { return s.hadTime; }), true);
+  assert.strictEqual(done.latest.label, 'Finish *');
+  assert.strictEqual(done.result.finishTime, '03:25:55');
+});
+
 if (failures) { console.log('\n' + failures + ' test(s) failed'); process.exit(1); }
 console.log('\nall splits tests passed');

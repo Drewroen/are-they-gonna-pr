@@ -255,9 +255,25 @@
     var meta = metaFrom(html);
     var runner = runnerFrom(fields);
     var v = function (name) { return fields[name] ? fields[name].value : null; };
+
+    // A live page fills the whole table as soon as the runner starts: the mats
+    // still ahead carry projected times (the "*" marker). The Race Status box
+    // names the last split that actually happened, so anything past it has not
+    // been run yet, whatever the table shows. Keep the page's projection on the
+    // row, but not as a time he has.
+    var officialKm = distanceKmFor(v('__last_split_name'), null);
+    if (officialKm !== null) {
+      splits.forEach(function (s) {
+        if (s.distanceKm !== null && s.distanceKm > officialKm + 1e-6) {
+          s.projected = true;
+          s.hadTime = false;
+        }
+      });
+    }
+
     // finish row of the splits table: the archive template leaves the Result
     // box empty and only carries the finish here
-    var finishSplit = splits.filter(function (s) { return /^finish/.test(s.key); })[0] || null;
+    var finishSplit = splits.filter(function (s) { return /^finish/.test(s.key) && s.hadTime; })[0] || null;
     var finishField = v('time_finish_netto') || v('time_finish');
     var finishTime = finishField || (finishSplit && finishSplit.elapsed);
     var lastSplit = latest(splits);
