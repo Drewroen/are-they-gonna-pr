@@ -27,10 +27,10 @@
   },
   "status": {
     "raceStatus": "Started",
-    "lastSplit": "40K",
-    "predictedFinish": "02:58:08",
-    "predictedFinishSeconds": 10688,
-    "predictedFinishDay": "10:33:32",
+    "lastSplit": "Mile 25.2",
+    "predictedFinish": "02:58:39",
+    "predictedFinishSeconds": 10719,
+    "predictedFinishDay": "10:34:03",
     "startTime": "07:35:24"
   },
   "splits": [
@@ -260,70 +260,68 @@
     },
     {
       "key": "85",
-      "label": "Mile 25 *",
+      "label": "Mile 25",
       "distanceKm": 40.2336,
       "distanceMi": 25,
-      "timeOfDay": "10:25:21AM",
-      "elapsed": "02:49:57",
-      "elapsedSeconds": 10197,
-      "segment": "01:05",
-      "segmentSeconds": 65,
-      "paceSecPerKm": 292,
-      "paceSecPerMi": 470,
-      "kmh": 12.34,
-      "mph": 7.67,
-      "hadTime": false,
-      "projected": true
+      "timeOfDay": "10:25:24AM",
+      "elapsed": "02:50:01",
+      "elapsedSeconds": 10201,
+      "segment": "01:09",
+      "segmentSeconds": 69,
+      "paceSecPerKm": 308,
+      "paceSecPerMi": 495,
+      "kmh": 11.71,
+      "mph": 7.28,
+      "hadTime": true
     },
     {
       "key": "96",
-      "label": "Mile 25.2 *",
+      "label": "Mile 25.2",
       "distanceKm": 40.5554688,
       "distanceMi": 25.2,
-      "timeOfDay": "10:26:57AM",
-      "elapsed": "02:51:33",
-      "elapsedSeconds": 10293,
-      "segment": "01:36",
-      "segmentSeconds": 96,
-      "paceSecPerKm": 292,
-      "paceSecPerMi": 470,
-      "kmh": 12.34,
-      "mph": 7.67,
-      "hadTime": false,
-      "projected": true
+      "timeOfDay": "10:27:07AM",
+      "elapsed": "02:51:43",
+      "elapsedSeconds": 10303,
+      "segment": "01:42",
+      "segmentSeconds": 102,
+      "paceSecPerKm": 310,
+      "paceSecPerMi": 498,
+      "kmh": 11.64,
+      "mph": 7.24,
+      "hadTime": true
     },
     {
       "key": "finish_netto",
       "label": "Finish *",
       "distanceKm": 42.195,
       "distanceMi": 26.218757456454306,
-      "timeOfDay": "10:34:56AM",
-      "elapsed": "02:59:32",
-      "elapsedSeconds": 10772,
-      "segment": "07:59",
-      "segmentSeconds": 479,
-      "paceSecPerKm": 292,
-      "paceSecPerMi": 470,
-      "kmh": 12.34,
-      "mph": 7.67,
+      "timeOfDay": "10:35:34AM",
+      "elapsed": "03:00:10",
+      "elapsedSeconds": 10810,
+      "segment": "08:27",
+      "segmentSeconds": 507,
+      "paceSecPerKm": 310,
+      "paceSecPerMi": 498,
+      "kmh": 11.64,
+      "mph": 7.24,
       "hadTime": false,
       "projected": true
     }
   ],
   "latest": {
-    "key": "40",
-    "label": "40K",
-    "distanceKm": 40,
-    "distanceMi": 24.854847689493358,
-    "timeOfDay": "10:24:16AM",
-    "elapsed": "02:48:52",
-    "elapsedSeconds": 10132,
-    "segment": "06:45",
-    "segmentSeconds": 405,
-    "paceSecPerKm": 292,
-    "paceSecPerMi": 470,
-    "kmh": 12.34,
-    "mph": 7.67,
+    "key": "96",
+    "label": "Mile 25.2",
+    "distanceKm": 40.5554688,
+    "distanceMi": 25.2,
+    "timeOfDay": "10:27:07AM",
+    "elapsed": "02:51:43",
+    "elapsedSeconds": 10303,
+    "segment": "01:42",
+    "segmentSeconds": 102,
+    "paceSecPerKm": 310,
+    "paceSecPerMi": 498,
+    "kmh": 11.64,
+    "mph": 7.24,
     "hadTime": true
   },
   "fields": {
@@ -361,15 +359,15 @@
     },
     "__last_split_name": {
       "name": "Last Split",
-      "value": "40K"
+      "value": "Mile 25.2"
     },
     "__estimated_finish": {
       "name": "Pred. Finish",
-      "value": "02:58:08"
+      "value": "02:58:39"
     },
     "__estimated_finish_day": {
       "name": "Pred. Finish (Time of Day)",
-      "value": "10:33:32"
+      "value": "10:34:03"
     }
   }
 }
