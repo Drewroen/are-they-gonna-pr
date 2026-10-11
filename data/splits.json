@@ -21,9 +21,9 @@
     "placeGender": null,
     "placeAgeGroup": null,
     "placeOverall": null,
-    "finishTime": "02:51:14",
-    "finishSeconds": 10274,
-    "finishFrom": "split"
+    "finishTime": null,
+    "finishSeconds": null,
+    "finishFrom": null
   },
   "status": {
     "raceStatus": "Started",
@@ -64,7 +64,8 @@
       "paceSecPerMi": 392,
       "kmh": 14.79,
       "mph": 9.19,
-      "hadTime": true
+      "hadTime": false,
+      "projected": true
     },
     {
       "key": "15",
@@ -80,7 +81,8 @@
       "paceSecPerMi": 392,
       "kmh": 14.79,
       "mph": 9.19,
-      "hadTime": true
+      "hadTime": false,
+      "projected": true
     },
     {
       "key": "20",
@@ -96,7 +98,8 @@
       "paceSecPerMi": 392,
       "kmh": 14.79,
       "mph": 9.19,
-      "hadTime": true
+      "hadTime": false,
+      "projected": true
     },
     {
       "key": "52",
@@ -112,7 +115,8 @@
       "paceSecPerMi": 392,
       "kmh": 14.79,
       "mph": 9.19,
-      "hadTime": true
+      "hadTime": false,
+      "projected": true
     },
     {
       "key": "25",
@@ -128,7 +132,8 @@
       "paceSecPerMi": 392,
       "kmh": 14.79,
       "mph": 9.19,
-      "hadTime": true
+      "hadTime": false,
+      "projected": true
     },
     {
       "key": "30",
@@ -144,7 +149,8 @@
       "paceSecPerMi": 392,
       "kmh": 14.79,
       "mph": 9.19,
-      "hadTime": true
+      "hadTime": false,
+      "projected": true
     },
     {
       "key": "80",
@@ -160,7 +166,8 @@
       "paceSecPerMi": 392,
       "kmh": 14.79,
       "mph": 9.19,
-      "hadTime": true
+      "hadTime": false,
+      "projected": true
     },
     {
       "key": "81",
@@ -176,7 +183,8 @@
       "paceSecPerMi": 392,
       "kmh": 14.79,
       "mph": 9.19,
-      "hadTime": true
+      "hadTime": false,
+      "projected": true
     },
     {
       "key": "35",
@@ -192,7 +200,8 @@
       "paceSecPerMi": 392,
       "kmh": 14.79,
       "mph": 9.19,
-      "hadTime": true
+      "hadTime": false,
+      "projected": true
     },
     {
       "key": "82",
@@ -208,7 +217,8 @@
       "paceSecPerMi": 392,
       "kmh": 14.79,
       "mph": 9.19,
-      "hadTime": true
+      "hadTime": false,
+      "projected": true
     },
     {
       "key": "83",
@@ -224,7 +234,8 @@
       "paceSecPerMi": 392,
       "kmh": 14.79,
       "mph": 9.19,
-      "hadTime": true
+      "hadTime": false,
+      "projected": true
     },
     {
       "key": "84",
@@ -240,7 +251,8 @@
       "paceSecPerMi": 392,
       "kmh": 14.79,
       "mph": 9.19,
-      "hadTime": true
+      "hadTime": false,
+      "projected": true
     },
     {
       "key": "40",
@@ -256,7 +268,8 @@
       "paceSecPerMi": 392,
       "kmh": 14.79,
       "mph": 9.19,
-      "hadTime": true
+      "hadTime": false,
+      "projected": true
     },
     {
       "key": "85",
@@ -272,7 +285,8 @@
       "paceSecPerMi": 392,
       "kmh": 14.79,
       "mph": 9.19,
-      "hadTime": true
+      "hadTime": false,
+      "projected": true
     },
     {
       "key": "96",
@@ -288,7 +302,8 @@
       "paceSecPerMi": 392,
       "kmh": 14.79,
       "mph": 9.19,
-      "hadTime": true
+      "hadTime": false,
+      "projected": true
     },
     {
       "key": "finish_netto",
@@ -304,19 +319,20 @@
       "paceSecPerMi": 392,
       "kmh": 14.79,
       "mph": 9.19,
-      "hadTime": true
+      "hadTime": false,
+      "projected": true
     }
   ],
   "latest": {
-    "key": "finish_netto",
-    "label": "Finish *",
-    "distanceKm": 42.195,
-    "distanceMi": 26.218757456454306,
-    "timeOfDay": "10:26:37AM",
-    "elapsed": "02:51:14",
-    "elapsedSeconds": 10274,
-    "segment": "06:40",
-    "segmentSeconds": 400,
+    "key": "05",
+    "label": "05K",
+    "distanceKm": 5,
+    "distanceMi": 3.1068559611866697,
+    "timeOfDay": "07:55:42AM",
+    "elapsed": "00:20:18",
+    "elapsedSeconds": 1218,
+    "segment": "20:18",
+    "segmentSeconds": 1218,
     "paceSecPerKm": 244,
     "paceSecPerMi": 392,
     "kmh": 14.79,
