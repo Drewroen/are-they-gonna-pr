@@ -18,9 +18,9 @@
     "short": "DR"
   },
   "result": {
-    "placeGender": "2871",
+    "placeGender": "2870",
     "placeAgeGroup": "628",
-    "placeOverall": "3172",
+    "placeOverall": "3171",
     "finishTime": "02:59:19",
     "finishSeconds": 10759,
     "finishFrom": "result"
@@ -354,7 +354,7 @@
     },
     "place_all": {
       "name": "Place Gender",
-      "value": "2871"
+      "value": "2870"
     },
     "place_age": {
       "name": "Place Age Group",
@@ -362,7 +362,7 @@
     },
     "place_nosex": {
       "name": "Place Overall",
-      "value": "3172"
+      "value": "3171"
     },
     "time_finish_netto": {
       "name": "Finish Time",
