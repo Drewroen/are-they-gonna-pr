@@ -18,19 +18,19 @@
     "short": "DR"
   },
   "result": {
-    "placeGender": null,
-    "placeAgeGroup": null,
-    "placeOverall": null,
-    "finishTime": null,
-    "finishSeconds": null,
-    "finishFrom": null
+    "placeGender": "2426",
+    "placeAgeGroup": "560",
+    "placeOverall": "2635",
+    "finishTime": "02:59:19",
+    "finishSeconds": 10759,
+    "finishFrom": "result"
   },
   "status": {
-    "raceStatus": "Started",
-    "lastSplit": "Mile 25.2",
-    "predictedFinish": "02:58:39",
-    "predictedFinishSeconds": 10719,
-    "predictedFinishDay": "10:34:03",
+    "raceStatus": "Finished",
+    "lastSplit": "Finish",
+    "predictedFinish": null,
+    "predictedFinishSeconds": null,
+    "predictedFinishDay": null,
     "startTime": "07:35:24"
   },
   "splits": [
@@ -292,36 +292,35 @@
     },
     {
       "key": "finish_netto",
-      "label": "Finish *",
+      "label": "Finish",
       "distanceKm": 42.195,
       "distanceMi": 26.218757456454306,
-      "timeOfDay": "10:35:34AM",
-      "elapsed": "03:00:10",
-      "elapsedSeconds": 10810,
-      "segment": "08:27",
-      "segmentSeconds": 507,
-      "paceSecPerKm": 310,
-      "paceSecPerMi": 498,
-      "kmh": 11.64,
-      "mph": 7.24,
-      "hadTime": false,
-      "projected": true
+      "timeOfDay": "10:34:43AM",
+      "elapsed": "02:59:19",
+      "elapsedSeconds": 10759,
+      "segment": "07:36",
+      "segmentSeconds": 456,
+      "paceSecPerKm": 279,
+      "paceSecPerMi": 448,
+      "kmh": 12.94,
+      "mph": 8.05,
+      "hadTime": true
     }
   ],
   "latest": {
-    "key": "96",
-    "label": "Mile 25.2",
-    "distanceKm": 40.5554688,
-    "distanceMi": 25.2,
-    "timeOfDay": "10:27:07AM",
-    "elapsed": "02:51:43",
-    "elapsedSeconds": 10303,
-    "segment": "01:42",
-    "segmentSeconds": 102,
-    "paceSecPerKm": 310,
-    "paceSecPerMi": 498,
-    "kmh": 11.64,
-    "mph": 7.24,
+    "key": "finish_netto",
+    "label": "Finish",
+    "distanceKm": 42.195,
+    "distanceMi": 26.218757456454306,
+    "timeOfDay": "10:34:43AM",
+    "elapsed": "02:59:19",
+    "elapsedSeconds": 10759,
+    "segment": "07:36",
+    "segmentSeconds": 456,
+    "paceSecPerKm": 279,
+    "paceSecPerMi": 448,
+    "kmh": 12.94,
+    "mph": 8.05,
     "hadTime": true
   },
   "fields": {
@@ -353,21 +352,29 @@
       "name": "Start Time",
       "value": "07:35:24"
     },
+    "place_all": {
+      "name": "Place Gender",
+      "value": "2426"
+    },
+    "place_age": {
+      "name": "Place Age Group",
+      "value": "560"
+    },
+    "place_nosex": {
+      "name": "Place Overall",
+      "value": "2635"
+    },
+    "time_finish_netto": {
+      "name": "Finish Time",
+      "value": "02:59:19"
+    },
     "__race_status": {
       "name": "Race Status",
-      "value": "Started"
+      "value": "Finished"
     },
     "__last_split_name": {
       "name": "Last Split",
-      "value": "Mile 25.2"
-    },
-    "__estimated_finish": {
-      "name": "Pred. Finish",
-      "value": "02:58:39"
-    },
-    "__estimated_finish_day": {
-      "name": "Pred. Finish (Time of Day)",
-      "value": "10:34:03"
+      "value": "Finish"
     }
   }
 }
