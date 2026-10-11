@@ -3,6 +3,8 @@ name: refresh splits
 # Every 5 minutes on 11 October (UTC) — race day — plus a manual trigger.
 # GitHub's floor for cron is 5 minutes, and scheduled runs can start late
 # under load — the manual trigger is there for that.
+# If the ticks ever go quiet, re-save this file: GitHub re-registers the cron
+# when the workflow file changes on the default branch.
 on:
   schedule:
     - cron: '*/5 * 11 10 *'
