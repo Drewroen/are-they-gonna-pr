@@ -26,7 +26,7 @@
     "finishFrom": null
   },
   "status": {
-    "raceStatus": null,
+    "raceStatus": "Not Started",
     "lastSplit": null,
     "predictedFinish": null,
     "predictedFinishSeconds": null,
@@ -332,6 +332,10 @@
     "display_name_short": {
       "name": "Short",
       "value": "DR"
+    },
+    "__race_status": {
+      "name": "Race Status",
+      "value": "Not Started"
     }
   }
 }
